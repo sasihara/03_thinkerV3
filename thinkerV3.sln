@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30517.126
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "thinkerV3", "thinkerV3\thinkerV3.vcxproj", "{01F4CD09-1BAC-455B-8784-318E1FF64768}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Debug|x64.ActiveCfg = Debug|x64
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Debug|x64.Build.0 = Debug|x64
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Debug|x86.ActiveCfg = Debug|Win32
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Debug|x86.Build.0 = Debug|Win32
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Release|x64.ActiveCfg = Release|x64
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Release|x64.Build.0 = Release|x64
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Release|x86.ActiveCfg = Release|Win32
+		{01F4CD09-1BAC-455B-8784-318E1FF64768}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C22787AD-EA19-4FA5-ACF4-6E1F13AEDA8E}
+	EndGlobalSection
+EndGlobal

@@ -10,12 +10,12 @@ Intel Core i5 2.4GHz程度のCPUであれば十分遊べますが、GPUがある
 ## 開発環境
 Microsoft Visual Studio Community 2022での動作を確認しております。それ以外の環境については未確認ですが、基本的なAPIしか使用してないため、他のバージョンでも動作する可能性は高いと思います。
 ## コンパイル・実行
-プロジェクトファイルはthinkerV3.slnです。Visual Studioでオープンしコンパイルすると、実行バイナリがx64\Releaseフォルダの下に作成されますので、それらをダブルクリックすることで実行できます。
+- プロジェクトファイルはthinkerV3.slnです。Visual Studioでオープンしコンパイルすると、実行バイナリがx64\Releaseフォルダの下に作成されますので、それらをダブルクリックすることで実行できます。
 
-本思考ルーチンの実行には、tensorflow.dllが必要となります。
+- 本思考ルーチンの実行には、tensorflow.dllが必要となります。
 [Tensoflowのホームページ](https://www.tensorflow.org/install/lang_c?hl=ja)よりダウンロードして、thinkerV3.exeと同じフォルダに格納してください。
 
-thnkerV3.exeを実行すると、デフォルトではUDPポート番号60001でメッセージ待ち受け状態に入ります。"01_othello"プロジェクトに格納されるothello.exeを実行し、
+- thnkerV3.exeを実行すると、デフォルトではUDPポート番号60001でメッセージ待ち受け状態に入ります。"01_othello"プロジェクトに格納されるothello.exeを実行し、
 ボード上をクリックすることで表示されるゲームの初期設定画面において、黒もしくは白のHost Nameに"localhost"を、Portに"60001"をセットすることで、本思考ルーチンを用いてプレーすることができます。
 
 ## 開発履歴

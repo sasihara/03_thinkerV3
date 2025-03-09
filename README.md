@@ -15,6 +15,8 @@ Microsoft Visual Studio Community 2022での動作を確認しております。
 本思考ルーチンの実行には、tensorflow.dllが必要となります。
 [Tensoflowのホームページ](https://www.tensorflow.org/install/lang_c?hl=ja)よりダウンロードして、thinkerV3.exeと同じフォルダに格納してください。
 
+thnkerV3.exeを実行すると、デフォルトではUDPポート番号60001でメッセージ待ち受け状態に入ります。"01_othello"プロジェクトに格納されるothello.exeを実行し、
+ボード上をクリックすることで表示されるゲームの初期設定画面において、黒もしくは白のHost Nameに"localhost"を、Portに"60001"をセットすることで、本思考ルーチンを用いてプレーすることができます。
 
 ## 開発履歴
 ### 2025/3/9

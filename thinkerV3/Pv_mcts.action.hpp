@@ -1,0 +1,24 @@
+#pragma once
+#include "TFHandler.hpp"
+#include "State.hpp"
+#include "Node.hpp"
+//#include "history.hpp"
+
+#define PV_EVALUATE_COUNT 300
+
+typedef double	Temperature;
+typedef int		Action;
+
+class Pv_mcts_action {
+public:
+	Pv_mcts_action(Model* _model, Temperature _temperature);
+	int run(State *state, Action* action, GameId gameId);
+	int pv_mcts_scores(State *state, std::vector<Scores>* scores);
+	int ranom_choice(State *state, std::vector<Scores> scores, Action *action);
+private:
+	Model *model;
+	Temperature temperature;
+	//History history;
+
+	int bolzman(std::vector<Scores>* scores, Temperature temperature);
+};

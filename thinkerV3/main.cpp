@@ -5,13 +5,23 @@
 
 #include <iostream>
 #include <WinSock2.h>		// Need to include before including "Windows.h", because it seems to include older version "winsock.h"
+#include "common.h"
 #include "externalThinkerMessages.hpp"
 #include "main.hpp"
 #include "think.hpp"
 #include "messageGenerator.hpp"
 #include "messageParser.hpp"
+#include "TFHandler.hpp"
+#include "history.hpp"
 
 #pragma warning(disable:4996 6031 6305)
+
+#define DEBUG 0
+
+// Global
+Logging logging;
+History history;
+Thinker thinker;
 
 //
 //	Function Name: main
@@ -27,6 +37,14 @@ int main(int argc, char **argv)
     int port = 60001;
     char buf[4096];
     int messageLen;
+    int ret;
+
+    // Logging
+#if DEBUG
+    LOGOUT_INIT(LOGLEVEL_ALL, "thinkerV3_log.txt");
+#else
+    LOGOUT_INIT(LOGLEVEL_WARNING, "thinkerV3_log.txt");
+#endif
 
     // Parameter check
     if (argc == 2) {
@@ -41,6 +59,15 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    // 乱数の初期化
+    srand((unsigned)time(0));
+
+    // Thinkerの初期化
+    ret = thinker.init();
+    if (ret < 0) {
+        return -2;
+    }
+
     // Initialize winsock
     WSAStartup(MAKEWORD(2, 0), &wsaData);
 
@@ -53,49 +80,72 @@ int main(int argc, char **argv)
     bind(sock, (struct sockaddr*) & addr, sizeof(addr));
 
     // Start to wait receiving requests
-    printf("Othello thinker version 2.00.\n");
+    printf("\n");
+    printf("Othello thinker version 3.00.\n");
     printf("Waiting requests at port = %d...\n", port);
 
     // Receive and handle messages until QUIT message is received
     for (;;) {
+        // 
+        fd_set readfds;
+
         memset(buf, 0, sizeof(buf));
-        messageLen = recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)&from, &sockaddr_in_size);
 
-        // Message length check
-        if (messageLen < sizeof(MESSAGEHEADER)) continue;
+        FD_ZERO(&readfds);
+        FD_SET(sock, &readfds);
+        ret = select(1, &readfds, NULL, NULL, NULL);
 
-        // Parse the received message
-        MessageParser messageParser;
-        if (messageParser.SetParam(buf, messageLen) != 0) continue;
+        if (FD_ISSET(sock, &readfds)) {
+            messageLen = recvfrom(sock, buf, sizeof(buf), 0, (struct sockaddr*)&from, &sockaddr_in_size);
 
-        // Get the message type
-        MESSAGETYPE messageType;
-        if (messageParser.getMessageType(&messageType) != 0) continue;
+            // Message length check
+            if (messageLen < sizeof(MESSAGEHEADER)) continue;
 
-        // Go out this loop if QUIT message is received
-        if (messageType == MESSAGETYPE::QUIT) break;
+            // Parse the received message
+            MessageParser messageParser;
+            if (messageParser.SetParam(buf, messageLen) != 0) continue;
 
-        // Handle the received message according to the message type
-        switch (messageType) {
-        case MESSAGETYPE::INFORMATION_REQUEST:  // Information Request
-            HandleInformationRequest(messageParser, sock, from, sockaddr_in_size);
-            break;
-        case MESSAGETYPE::THINK_REQUEST:        // Think Request
-            HandleThinkRequest(messageParser, sock, from, sockaddr_in_size);
-            break;
-        case MESSAGETYPE::THINK_STOP_REQUEST:   // Think Stop Request
-            // Don't support this message.
-            break;
-        default:
-            break;
+            // Get the message type
+            MESSAGETYPE messageType;
+            if (messageParser.getMessageType(&messageType) != 0) continue;
+
+            // Go out this loop if QUIT message is received
+            if (messageType == MESSAGETYPE::QUIT) break;
+
+            // Handle the received message according to the message type
+            switch (messageType) {
+            case MESSAGETYPE::INFORMATION_REQUEST:  // Information Request
+                printf("Information Request Received.\n");
+                HandleInformationRequest(messageParser, sock, from, sockaddr_in_size);
+                break;
+            case MESSAGETYPE::THINK_REQUEST:        // Think Request
+                HandleThinkRequest(messageParser, sock, from, sockaddr_in_size);
+                break;
+            case MESSAGETYPE::THINK_STOP_REQUEST:   // Think Stop Request
+                // Currently don't support this message.
+                break;
+            case MESSAGETYPE::GAME_FINISHED:        // Game Finished
+                printf("Game Finished Received.\n");
+                HandleGameFinished(messageParser, sock, from, sockaddr_in_size);
+                break;
+            default:
+                break;
+            }
+
+            // Write to log
+            LOGOUT_FLUSH();
+
+            // Release the message
+            messageParser.free();
         }
-
-        // Release the message
-        messageParser.free();
     }
 
     closesocket(sock);
     WSACleanup();
+
+    // Logging
+    LOGOUT_END();
+
     return 0;
 }
 
@@ -121,12 +171,16 @@ void HandleInformationRequest(MessageParser messageParser, SOCKET sock, struct s
     MessageGenerator messageGenerator;
     messageGenerator.SetParams(respMessage, MAX_MESSAGE_LENGTH);
     messageGenerator.makeMessageHeader(MESSAGETYPE::INFORMATION_RESPONSE);
+    messageGenerator.addTLVVersion(VERSION);
+    messageGenerator.addTLVTextInfo(TEXTINFO);
 
     // Check if building the message finished successfully
     if ((messageLength = messageGenerator.getSize()) < 0) return;
 
     // Send INFORMATION_RESPONSE to the peer
     sendto(sock, respMessage, messageLength, 0, (struct sockaddr*)&from, sockaddr_in_size);
+
+    printf("Information Response sent.\n");
 }
 
 //
@@ -148,23 +202,81 @@ void HandleThinkRequest(MessageParser messageParser, SOCKET sock, struct sockadd
     DISKCOLORS board[64];
     int turn = 0;
     int id = 0;
-    Thinker thinker;
+    static GameId gameId;
+    static bool prevGameIdAvail = false;
     int ret;
 
     // Get data from received message
     if (messageParser.getTLVParamsBoard(board) != 0) return;        // Get the board data
     if (messageParser.getTLVParamsTurn(&turn) != 0) return;         // Get the turn value
     if (messageParser.getTLVParamsID(&id) != 0) return;             // Get the ID value
+    if (messageParser.getTLVParamsGameId(&gameId)) return;          // Get the game Id
+
+    printf("Think Request Received. ID = %d.\n", id);
 
     // Send Think Accept message
     ret = SendThinkAccept(id, sock, from, sockaddr_in_size);
 
-    // Think
-    thinker.SetParams(turn, board);
-    ret = thinker.think();
+    printf("Think Accept sent. ID = %d. Thinking...\n", id);
 
-    // Send Think Response message
-    ret = SendThinkResponse(id, (unsigned char) ret / 10, (unsigned char) ret % 10, sock, from, sockaddr_in_size);
+    // Think
+    int place;
+    ret = thinker.think(turn, board, &place, gameId);
+
+    if (ret == 0) {
+        // Send Think Response message
+        ret = SendThinkResponse(id, (unsigned char)place / 10, (unsigned char)place % 10, sock, from, sockaddr_in_size);
+
+        printf("Think Response sent. ID = %d.\n", id);
+    }
+    else {
+        ret = SendThinkReject(id, sock, from, sockaddr_in_size);
+
+        printf("Think Reject sent. ID = %d.\n", id);
+    }
+}
+
+//
+//	Function Name: HandleGameFinished
+//	Summary: Handle Game Finished message
+//	
+//	In:
+//		messageParser       MessageParser instance of the received Information Request message
+//      sock                socket to send the response message
+//      from                The parameter to set the 5th parameter in sendto function to transmit the response message.  
+//      sockaddr_in_size    The parameter to set the 6th parameter in sendto function to transmit the response message.
+//
+//	Return:
+//      None
+//
+void HandleGameFinished(MessageParser messageParser, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size)
+{
+    GameId gameId;
+    RESULT result;
+    DISKCOLORS diskcolor;
+    int ret;
+
+    // Get data from received message
+    if (messageParser.getTLVParamsGameId(&gameId)) return;          // Get the game Id
+    if (messageParser.getTLVParamsResult(&result)) return;          // Get the winner
+    if (messageParser.getTLVParamsDiskColor(&diskcolor)) return;          // Get the winner
+
+    // value値をセット & 学習データのファイル出力を行う
+    // resultが自身なら1.0、相手なら-1.0, 引き分けなら0.0
+    switch (result) {
+    case RESULT::WIN :
+        ret = history.setValue(gameId, diskcolor, 1.0);
+        break;
+    case RESULT::LOSE :
+        ret = history.setValue(gameId, diskcolor, -1.0);
+        break;
+    case RESULT::EVEN :
+        ret = history.setValue(gameId, diskcolor, 0.0);
+        break;
+    default:
+        break;
+    }
+    return;
 }
 
 //
@@ -183,7 +295,7 @@ void HandleThinkRequest(MessageParser messageParser, SOCKET sock, struct sockadd
 //
 int SendThinkAccept(int id, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size)
 {
-    char message[4096];
+    char message[MAX_MESSAGE_LENGTH];
     MessageGenerator messageGenerator;
 
     // Build Think Accpest message
@@ -218,7 +330,7 @@ int SendThinkAccept(int id, SOCKET sock, struct sockaddr_in from, int sockaddr_i
 //
 int SendThinkResponse(int id, unsigned char x, unsigned char y, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size)
 {
-    char message[4096];
+    char message[MAX_MESSAGE_LENGTH];
     MessageGenerator messageGenerator;
 
     // Build Think Response message
@@ -226,6 +338,39 @@ int SendThinkResponse(int id, unsigned char x, unsigned char y, SOCKET sock, str
     messageGenerator.makeMessageHeader(MESSAGETYPE::THINK_RESPONSE);
     messageGenerator.addTLVID(id);
     messageGenerator.addTLVPlace(x, y);
+
+    // Check if building the message has succeeded or not
+    if (messageGenerator.getSize() <= 0) return -1;
+
+    // Send message
+    sendto(sock, message, messageGenerator.getSize(), 0, (struct sockaddr*)&from, sockaddr_in_size);
+
+    return 0;
+}
+
+//
+//	Function Name: SendThinkReject
+//	Summary: Send Think Reject message
+//	
+//	In:
+//		id                  Transaction ID received in Think Request message
+//      sock                socket to send the response message
+//      from                The parameter to set the 5th parameter in sendto function to transmit the response message.  
+//      sockaddr_in_size    The parameter to set the 6th parameter in sendto function to transmit the response message.
+//
+//	Return:
+//      0                   Succeed
+//      -1                  Failed to build Think Accept message
+//
+int SendThinkReject(int id, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size)
+{
+    char message[MAX_MESSAGE_LENGTH];
+    MessageGenerator messageGenerator;
+
+    // Build Think Response message
+    messageGenerator.SetParams(message, sizeof(message));
+    messageGenerator.makeMessageHeader(MESSAGETYPE::THINK_REJECT);
+    messageGenerator.addTLVID(id);
 
     // Check if building the message has succeeded or not
     if (messageGenerator.getSize() <= 0) return -1;

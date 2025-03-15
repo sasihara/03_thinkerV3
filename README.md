@@ -22,3 +22,7 @@ Microsoft Visual Studio Community 2022での動作を確認しております。
 ## 開発履歴
 ### 2025/3/9
 初期バージョン。
+
+## NOTICE
+This software includes the work that is distributed in the Apache License 2.0. <BR>
+このソフトウェアは、 Apache 2.0ライセンスで配布されている製作物が含まれています。

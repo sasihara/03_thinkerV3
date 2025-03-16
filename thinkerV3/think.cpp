@@ -26,6 +26,16 @@ int Thinker::init()
 		return -1;
 	}
 
+	// ƒ‚ƒfƒ‹–¼‚ÌŽæ“¾
+	FILE* f;
+	if (fopen_s(&f, "04_OthelloDeepModel\\MODELINFO.txt", "r") == 0) {
+		fscanf_s(f, "%s", modelInfo, (unsigned int)sizeof(modelInfo));
+		fclose(f);
+	}
+	else {
+		strcpy_s(modelInfo, sizeof(modelInfo), MODELINFO);
+	}
+
 	isInitialized = true;
 
 	return 0;
@@ -87,3 +97,7 @@ int Thinker::think(int turn, DISKCOLORS *board, int *place, GameId gameId)
 	return 0;
 }
 
+char* Thinker::getModelInfo()
+{
+	return modelInfo;
+}

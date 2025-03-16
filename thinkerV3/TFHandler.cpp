@@ -16,7 +16,7 @@ int load_model(Model *model)
 	model->RunOpts = NULL;
 
 	// Load Othello Deep Model
-	const char* saved_model_dir = "../04_OthelloDeepModel/best";
+	const char* saved_model_dir = "04_OthelloDeepModel/best";
 	const char* tags = "serve";
 	int ntags = 1;
 

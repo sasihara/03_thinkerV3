@@ -51,7 +51,7 @@ int main(int argc, char **argv)
         port = atoi(argv[1]);
     }
     else if (argc > 2) {
-        printf("\n\nUsage: thinkerV2.exe [port]\n\n");
+        printf("\n\nUsage: thinkerV3.exe [port]\n\n");
     }
 
     if (port <= 1024) {
@@ -81,7 +81,8 @@ int main(int argc, char **argv)
 
     // Start to wait receiving requests
     printf("\n");
-    printf("Othello thinker version 3.00.\n");
+    printf("%s\n", TEXTINFO);
+    printf("Model = %s\n", thinker.getModelInfo());
     printf("Waiting requests at port = %d...\n", port);
 
     // Receive and handle messages until QUIT message is received
@@ -172,7 +173,10 @@ void HandleInformationRequest(MessageParser messageParser, SOCKET sock, struct s
     messageGenerator.SetParams(respMessage, MAX_MESSAGE_LENGTH);
     messageGenerator.makeMessageHeader(MESSAGETYPE::INFORMATION_RESPONSE);
     messageGenerator.addTLVVersion(VERSION);
-    messageGenerator.addTLVTextInfo(TEXTINFO);
+
+    char textInfo[1024];
+    sprintf_s(textInfo, sizeof(textInfo), "%s(%s)", TEXTINFO, thinker.getModelInfo());
+    messageGenerator.addTLVTextInfo(textInfo);
 
     // Check if building the message finished successfully
     if ((messageLength = messageGenerator.getSize()) < 0) return;

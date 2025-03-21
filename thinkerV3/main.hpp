@@ -3,8 +3,8 @@
 #include "messageParser.hpp"
 #include "TFHandler.hpp"
 
-#define	VERSION		301
-#define	TEXTINFO	"Othello Thinker V3.01(Alpha Go Based)"
+#define	VERSION		302
+#define	TEXTINFO	"Othello Thinker V3.02(Alpha Go Based)"
 
 void HandleInformationRequest(MessageParser messageParser, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size);
 void HandleThinkRequest(MessageParser messageParser, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size);

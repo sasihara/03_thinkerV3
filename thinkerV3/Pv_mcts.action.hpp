@@ -13,12 +13,12 @@ class Pv_mcts_action {
 public:
 	Pv_mcts_action(Model* _model, Temperature _temperature);
 	int run(State *state, Action* action, GameId gameId);
-	int pv_mcts_scores(State *state, std::vector<Scores>* scores);
-	int ranom_choice(State *state, std::vector<Scores> scores, Action *action);
+	int pv_mcts_scores(State *state, std::vector<Score>* scores);
+	int ranom_choice(State *state, std::vector<Score> scores, Action *action);
 private:
 	Model *model;
 	Temperature temperature;
 	//History history;
 
-	int bolzman(std::vector<Scores>* scores, Temperature temperature);
+	int bolzman(std::vector<Score>* scores, Temperature temperature);
 };

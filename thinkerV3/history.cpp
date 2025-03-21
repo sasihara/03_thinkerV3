@@ -16,10 +16,8 @@ int History::init()
 	return 0;
 }
 
-int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::vector<Scores> scores)
+int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::vector<Score> scores)
 {
-	int ret;
-
 	logging.logout("History::add()äJén. isGameIdValid = %d, ï€ë∂çœÇ›gameId.pid = %d, éwíËgameId.pid = %d.",
 		isGameIdValid,
 		gameId.pid,

@@ -14,23 +14,23 @@ Node::Node(Model *_model, State *_state, double _p)
 
 	model = _model;
 	p = _p;
+	w = 0.0;
+	n = 0;
 
 	ret = _state->copyTo(&state);
 	if (ret < 0) return;
 
-	w = 0.0;
-	n = 0;
-	child_nodes.clear();
+	child_node_list.clear();
 
 	initialized = true;
 }
 
 Node::~Node()
 {
-	size_t n = child_nodes.size();
+	size_t n = child_node_list.size();
 
 	for (size_t i = 0; i < n; i++) {
-		delete child_nodes[i].node;
+		delete child_node_list[i].node;
 	}
 }
 
@@ -53,16 +53,20 @@ int Node::evaluate(float *result)
 		if (ret < 0) return -2;
 
 		if (gameResult == GAMERESULT_ERROR) return -1;
-		else if (gameResult == GAMERESULT_LOSE) value = -1;
+		else if (gameResult == GAMERESULT_LOSE) value = -1.0;
 
 		LOGOUT(LOGLEVEL_TRACE, "ゲーム結果 = %s, value = %.6f", gameResult == GAMERESULT_WIN ? "勝ち" : gameResult == GAMERESULT_LOSE ? "負け" : "引き分け", value);
+
+		// (★残課題) 上のコードだと勝った場合もvalue = 0だが、それで正しいか？？
+		// 参照した本のモンテカルロ法についての本文説明では、勝った場合は+1.0を返すとの説明、
+		// ただコードはそうなっていない。要検討。
 
 		w += value;
 		n += 1;
 		*result = value;
 		LOGOUT(LOGLEVEL_TRACE, "w <= %.6f, n <= %d, result = %.6f", w, n, *result);
 	}
-	else if (child_nodes.size() == 0) {
+	else if (child_node_list.size() == 0) {
 
 		// Call predict()
 		float policies[DN_OUTPUT_SIZE];
@@ -82,7 +86,7 @@ int Node::evaluate(float *result)
 		n += 1;
 
 		 //Update child_nodes
-		child_nodes.clear();
+		child_node_list.clear();
 
 		LOGOUT(LOGLEVEL_TRACE, "各合法手について石を置いた後の盤面をchild_nodesに追加します.");
 
@@ -96,22 +100,12 @@ int Node::evaluate(float *result)
 
 					LOGOUT(LOGLEVEL_TRACE, "合法手が見つかりました. x = %d, y = %d.", x, y);
 
-					//State* next;
-					State next;
-					//try {
-					//	next = new State();
-					//}
-					//catch (...) {
-					//	return -4;
-					//}
-
 					// 新たな盤面をコピーして生成する
-					//ret = next->init(state.board, state.opponent);
+					State next;
 					ret = next.init(state.board, state.opponent);
 					if (ret < 0) return -5;
 
 					// コピーした盤面上で石を置いて次の盤面を生成する
-					//ret = next->turnDisk(x, y, state.currentPlayer, flag);
 					ret = next.turnDisk(x, y, state.currentPlayer, flag);
 					if (ret < 0) return -6;
 
@@ -119,19 +113,18 @@ int Node::evaluate(float *result)
 					Node* child_node;
 					
 					try {
-						//child_node = new Node(model, next, policies[x * 8 + y]);
 						child_node = new Node(model, &next, policies[x * 8 + y]);
 					}
 					catch(...){
-						return -5;
+						return -7;
 					}
 
 					// Nodeインスタンスをchild_nodesに追加
-					ChildNode childNode;
-					childNode.x = x;
-					childNode.y = y;
-					childNode.node = child_node;
-					child_nodes.push_back(childNode);
+					Child child;
+					child.x = x;
+					child.y = y;
+					child.node = child_node;
+					child_node_list.push_back(child);
 
 					LOGOUT(LOGLEVEL_TRACE, "child_nodesに追加しました.");
 				}
@@ -145,19 +138,19 @@ int Node::evaluate(float *result)
 		LOGOUT(LOGLEVEL_TRACE, "子ノード数>0なのでアーク評価値の最も高い子ノードを選択します.");
 
 		// Call evaluate()
-		ChildNode* next_child_node;
+		Child* next_child_node;
 
 		ret = get_next_child_node(&next_child_node);
-		if (ret < 0) return -7;
+		if (ret < 0) return -8;
 
 		ret = next_child_node->node->evaluate(&value);
 		if (ret < 0) {
 			LOGOUT(LOGLEVEL_TRACE, "[ERROR] evaluate()でエラー発生。ret = %d", ret);
-			return -8;
+			return -9;
 		}
 
 		// Update w, n
-		w += value;
+		w -= value;			// w += -value;
 		n += 1;
 		*result = value;
 
@@ -167,7 +160,7 @@ int Node::evaluate(float *result)
 	return 0;
 }
 
-int Node::get_next_child_node(ChildNode** next_child_node)
+int Node::get_next_child_node(Child** next_child_node)
 {
 	int ret;
 	int t;
@@ -176,10 +169,10 @@ int Node::get_next_child_node(ChildNode** next_child_node)
 	LOGOUT(LOGLEVEL_TRACE, "get_next_child_node()開始.");
 
 	// 試行回数が0の子ノードを探す
-	for (size_t i = 0; i < child_nodes.size(); i++) {
-		if (child_nodes[i].node->n == 0) {
-			LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_nodes[i].x, child_nodes[i].y);
-			*next_child_node = &child_nodes[i];
+	for (size_t i = 0; i < child_node_list.size(); i++) {
+		if (child_node_list[i].node->n == 0) {
+			LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_node_list[i].x, child_node_list[i].y);
+			*next_child_node = &child_node_list[i];
 			return 0;
 		}
 	}
@@ -188,31 +181,31 @@ int Node::get_next_child_node(ChildNode** next_child_node)
 	ret = sum_child_nodes(&t);
 	if (ret < 0) return -1;
 
-	for (size_t i = 0; i < child_nodes.size(); i++) {
-		double pucb_value_1st = child_nodes[i].node->n > 0 ? child_nodes[i].node->w / child_nodes[i].node->n : 0.0;
-		double pucb_value_2nd = C_PUCT * child_nodes[i].node->p * sqrt((double)t) / (1 + child_nodes[i].node->n);
+	for (size_t i = 0; i < child_node_list.size(); i++) {
+		double pucb_value_1st = child_node_list[i].node->n > 0 ? child_node_list[i].node->w / child_node_list[i].node->n : 0.0;
+		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (1 + child_node_list[i].node->n);
 		double pucb_value = pucb_value_1st + pucb_value_2nd;
 
 		LOGOUT(LOGLEVEL_TRACE, "n = %d, w = %.6f, p = %.6f, t = %d, C_PUCT = %.6f, w / n = %f, C_PUCT * p * sqrt(t) / (1 + n) = %.6f",
-			child_nodes[i].node->n,
-			child_nodes[i].node->w,
-			child_nodes[i].node->p,
+			child_node_list[i].node->n,
+			child_node_list[i].node->w,
+			child_node_list[i].node->p,
 			t,
 			C_PUCT,
 			pucb_value_1st,
 			pucb_value_2nd
 		);
 
-		LOGOUT(LOGLEVEL_TRACE, "child_nodes No.%d: max = %.6g, x = %d, y = %d, pucb_value = %.6f", i, max_pucb_value, child_nodes[i].x, child_nodes[i].y, pucb_value);
+		LOGOUT(LOGLEVEL_TRACE, "child_nodes No.%d: max = %.6g, x = %d, y = %d, pucb_value = %.6f", i, max_pucb_value, child_node_list[i].x, child_node_list[i].y, pucb_value);
 
 		if (pucb_value > max_pucb_value) {
 			LOGOUT(LOGLEVEL_TRACE, "最大値を更新");
 			max_pucb_value = pucb_value;
-			*next_child_node = &child_nodes[i];
+			*next_child_node = &child_node_list[i];
 		}
 	}
 
-	LOGOUT(LOGLEVEL_TRACE, "get_next_child_node()終了. 選択された手: x = %d, y = %d.", (ChildNode*)(*next_child_node)->x, (ChildNode*)(*next_child_node)->y);
+	LOGOUT(LOGLEVEL_TRACE, "get_next_child_node()終了. 選択された手: x = %d, y = %d.", (Child*)(*next_child_node)->x, (Child*)(*next_child_node)->y);
 	return 0;
 }
 
@@ -221,28 +214,28 @@ int Node::sum_child_nodes(int* result)
 	size_t i, num;
 
 	// child_nodesの中が空の場合はエラーを返す
-	num = child_nodes.size();
+	num = child_node_list.size();
 	if (num <= 0) return -1;
 
 	// child_nodesに含まれるnodeのnの総和を求める
 	*result = 0;
 
 	for (i = 0; i < num; i++) {
-		*result += child_nodes[i].node->n;
+		*result += child_node_list[i].node->n;
 	}
 
 	return 0;
 }
 
-int Node::nodes_to_scores(std::vector<Scores>* numOfTrial)
+int Node::nodes_to_scores(std::vector<Score>* scores)
 {
-	for (int i = 0; i < child_nodes.size(); i++) {
-		Scores score;
-		score.x = child_nodes[i].x;
-		score.y = child_nodes[i].y;
-		score.n = child_nodes[i].node->n;
+	for (int i = 0; i < child_node_list.size(); i++) {
+		Score score;
+		score.x = child_node_list[i].x;
+		score.y = child_node_list[i].y;
+		score.n = child_node_list[i].node->n;
 
-		numOfTrial->push_back(score);
+		scores->push_back(score);
 	}
 
 	return 0;

@@ -8,16 +8,16 @@ class Node;
 
 typedef	double	Temperature;
 
-typedef struct _CHILDNODES {
+typedef struct _CHILD {
 	int x, y;
 	Node* node;
-} ChildNode;
+} Child;
 
-typedef struct _SCORES {
+typedef struct _SCORE {
 	int x, y;
 	int n;
 	double probability;
-} Scores;
+} Score;
 
 class Node {
 public:
@@ -27,13 +27,13 @@ public:
 	Node(Model *_model, State *_state, double _p);
 	~Node();
 	int evaluate(float *result);
-	int get_next_child_node(ChildNode** next_child_node);
+	int get_next_child_node(Child** next_child_node);
 	int sum_child_nodes(int* result);
-	int nodes_to_scores(std::vector<Scores> *scores);
+	int nodes_to_scores(std::vector<Score> *scores);
 private:
 	bool initialized = false;
 	State state;
-	double p;
-	double w;
-	std::vector<ChildNode> child_nodes;
+	double p = 0.0;
+	double w = 0.0;
+	std::vector<Child> child_node_list;
 };

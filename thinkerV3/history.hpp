@@ -21,7 +21,7 @@ typedef struct _HISTORY_DATA_LIST {
 
 class History {
 public:
-	int add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS *_board, std::vector<Scores> scores);
+	int add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS *_board, std::vector<Score> scores);
 	int setValue(GameId _gameId, DISKCOLORS diskcolor, float _value);
 private:
 	int init();

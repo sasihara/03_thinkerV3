@@ -138,6 +138,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\libtensorflow-cpu-windows-x86_64-2.6.0\include;..\..\01_othello\common;..\..\01_othello\othello</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
+      <CCppSupport>C18Support</CCppSupport>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

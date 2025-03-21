@@ -19,7 +19,7 @@ Pv_mcts_action::Pv_mcts_action(Model* _model, Temperature _temperature)
 int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 {
 	int ret;
-	std::vector<Scores> scores;
+	std::vector<Score> scores;
 
 	// 盤面のログ出力
 	state->logout(logging);
@@ -39,11 +39,19 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	}
 
 	// np.random.choice
-	ret = ranom_choice(state, scores, action);
+	if (scores.size() > 0) {
+		// 合法手が存在する場合
+		ret = ranom_choice(state, scores, action);
 
-	// 戻り値のチェック
-	if (ret < 0) {
-		return -3;
+		// 戻り値のチェック
+		if (ret < 0) {
+			return -3;
+		}
+	}
+	else {
+		// 合法手が存在しなかった場合
+		// パスを示すx=8, y=0をセット
+		*action = 80;
 	}
 
 	// ログ出力
@@ -54,7 +62,7 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	return 0;
 }
 
-int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Scores>* scores)
+int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Score>* scores)
 {
 	int ret;
 
@@ -79,7 +87,6 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Scores>* scores)
 		}
 
 		//scores = nodes_to_scores(root_node.child_nodes)
-		//logging.logout(LOGLEVEL_TRACE, "各合法手の回数のリスト化を開始.\n");
 		LOGOUT(LOGLEVEL_TRACE, "各合法手の回数のリスト化を開始.");
 		ret = root_node->nodes_to_scores(scores);
 		if (ret < 0) throw -3;
@@ -92,42 +99,50 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Scores>* scores)
 	// root_nodeと子ノードのメモリ解放
 	delete root_node;
 
-	//	if temperature == 0:
-	LOGOUT(LOGLEVEL_TRACE, "温度を考慮しつつ各合法手の選択確率を設定。温度=%.1f.", temperature);
-	if (temperature <= DBL_EPSILON) {
-		LOGOUT(LOGLEVEL_TRACE, "温度=0なので、最大スコアの合法手の選択確率=1とします.", temperature);
+	// 合法手有無のチェック
+	// 合法手が無い場合はscoresリストのサイズは0となる
+	if (scores->size() > 0) {
+		//	if temperature == 0:
+		LOGOUT(LOGLEVEL_TRACE, "温度を考慮しつつ各合法手の選択確率を設定。温度=%.1f.", temperature);
+		if (temperature <= DBL_EPSILON) {
+			LOGOUT(LOGLEVEL_TRACE, "温度=0なので、最大スコアの合法手の選択確率=1とします.", temperature);
 
-		// nが最大となるノードを見つける
-		int max_n = INT_MIN;
-		bool isFound = false;
-		size_t max_i = 0;
-	
-		//action = np.argmax(scores)
-		//	scores = np.zeros(len(scores))
-		//	scores[action] = 1
-		for (size_t i = 0; i < scores->size(); i++) {
-			// この時点でとりあえずすべての要素のprobabilityに0をセットしておく
-			scores->at(i).probability = 0.0;
+			// nが最大となるノードを見つける
+			int max_n = INT_MIN;
+			bool isFound = false;
+			size_t max_i = 0;
 
-			if (scores->at(i).n >= max_n) {
-				max_i = i;
-				max_n = scores->at(i).n;
-				isFound = true;
+			//action = np.argmax(scores)
+			//	scores = np.zeros(len(scores))
+			//	scores[action] = 1
+			for (size_t i = 0; i < scores->size(); i++) {
+				// この時点でとりあえずすべての要素のprobabilityに0をセットしておく
+				scores->at(i).probability = 0.0;
+
+				if (scores->at(i).n >= max_n || isFound == false) {
+					max_i = i;
+					max_n = scores->at(i).n;
+					isFound = true;
+				}
+			}
+
+			// 最大となったノードのprobabilityを1にセット
+			if (isFound == true) {
+				scores->at(max_i).probability = 1.0;
+			}
+			else {
+				// この条件が満たされることは無いが念のため
+				return -4;
 			}
 		}
+		else {
+			LOGOUT(LOGLEVEL_TRACE, "温度≠0なので、ボルツマン分布に従って各合法手の選択確率をセットします.", temperature);
 
-		// 最大となったノードのprobabilityを1にセット
-		if (isFound == true) {
-			scores->at(max_i).probability = 1.0;
-		}
-	}
-	else {
-		LOGOUT(LOGLEVEL_TRACE, "温度≠0なので、ボルツマン分布に従って各合法手の選択確率をセットします.", temperature);
-
-		//scores = boltzman(scores, temperature)
-		ret = bolzman(scores, temperature);
-		if (ret < 0) {
-			return -4;
+			//scores = boltzman(scores, temperature)
+			ret = bolzman(scores, temperature);
+			if (ret < 0) {
+				return -5;
+			}
 		}
 	}
 
@@ -137,7 +152,7 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Scores>* scores)
 	return 0;
 }
 
-int Pv_mcts_action::bolzman(std::vector<Scores>* scores, Temperature temperature)
+int Pv_mcts_action::bolzman(std::vector<Score>* scores, Temperature temperature)
 {
 	LOGOUT(LOGLEVEL_INFO, "bolzman()開始. temperature=%.6f", temperature);
 
@@ -178,7 +193,7 @@ int Pv_mcts_action::bolzman(std::vector<Scores>* scores, Temperature temperature
 //	実装方法:
 //		各合法手ごとに乱数を生成し、その値にスコア値(=確率分布)を乗じる。その乗じた結果の中で最大の合法手を選択する。
 // 
-int Pv_mcts_action::ranom_choice(State *state, std::vector<Scores> scores, Action* action)
+int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action* action)
 {
 	LOGOUT(LOGLEVEL_INFO, "ranom_choice()開始.");
 
@@ -189,14 +204,14 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Scores> scores, Actio
 
 	// 確率分布の値を先頭から加算し乱数値を超えた手前の値を選択する
 	double sum = 0.0;
-	size_t x, y;
+	size_t x = 0, y = 0;
 
 	for (size_t i = 0; i < scores.size(); i++) {
 		sum += scores[i].probability;
 
 		// 合計値が乱数値以上となった場合はその値を選択
 		// 確率分布の合計値は必ず最終的に乱数値の最大値の1.0となるので、必ず以下のif文が実行される
-		if (sum >= randomValue) {
+		if (sum >= randomValue - DBL_EPSILON) {
 			x = scores[i].x;
 			y = scores[i].y;
 

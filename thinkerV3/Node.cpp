@@ -126,7 +126,7 @@ int Node::evaluate(float *result)
 					child.node = child_node;
 					child_node_list.push_back(child);
 
-					LOGOUT(LOGLEVEL_TRACE, "child_nodesに追加しました.");
+					LOGOUT(LOGLEVEL_TRACE, "child_node_listに追加しました.");
 				}
 			}
 		}
@@ -169,13 +169,14 @@ int Node::get_next_child_node(Child** next_child_node)
 	LOGOUT(LOGLEVEL_TRACE, "get_next_child_node()開始.");
 
 	// 試行回数が0の子ノードを探す
-	for (size_t i = 0; i < child_node_list.size(); i++) {
-		if (child_node_list[i].node->n == 0) {
-			LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_node_list[i].x, child_node_list[i].y);
-			*next_child_node = &child_node_list[i];
-			return 0;
-		}
-	}
+	// 25/3/22 原書には無いコードなので一時的にコメントアウト
+	//for (size_t i = 0; i < child_node_list.size(); i++) {
+	//	if (child_node_list[i].node->n == 0) {
+	//		LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_node_list[i].x, child_node_list[i].y);
+	//		*next_child_node = &child_node_list[i];
+	//		return 0;
+	//	}
+	//}
 	
 	// パラメータt(合計値)を計算する
 	ret = sum_child_nodes(&t);
@@ -183,7 +184,7 @@ int Node::get_next_child_node(Child** next_child_node)
 
 	for (size_t i = 0; i < child_node_list.size(); i++) {
 		double pucb_value_1st = child_node_list[i].node->n > 0 ? child_node_list[i].node->w / child_node_list[i].node->n : 0.0;
-		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (1 + child_node_list[i].node->n);
+		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (double)(1 + child_node_list[i].node->n);
 		double pucb_value = pucb_value_1st + pucb_value_2nd;
 
 		LOGOUT(LOGLEVEL_TRACE, "n = %d, w = %.6f, p = %.6f, t = %d, C_PUCT = %.6f, w / n = %f, C_PUCT * p * sqrt(t) / (1 + n) = %.6f",

@@ -226,7 +226,6 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action
 
 	// 確率分布の合計値が1.0未満で本来はあり得ない。この場合はエラーとして返す。
 	LOGOUT(LOGLEVEL_TRACE, "[ERROR] 入力された確率分布の積分値が1より小さいです。積分値 = %f。", sum);
-
 	LOGOUT(LOGLEVEL_INFO, "ranom_choice()終了.");
 	return -1;
 }

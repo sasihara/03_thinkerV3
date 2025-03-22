@@ -16,8 +16,6 @@
 
 #pragma warning(disable:4996 6031 6305)
 
-#define DEBUG 0
-
 // Global
 Logging logging;
 History history;
@@ -40,7 +38,7 @@ int main(int argc, char **argv)
     int ret;
 
     // Logging
-#if DEBUG
+#ifdef _DEBUG
     LOGOUT_INIT(LOGLEVEL_ALL, "thinkerV3_log.txt");
 #else
     LOGOUT_INIT(LOGLEVEL_WARNING, "thinkerV3_log.txt");

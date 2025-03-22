@@ -16,7 +16,7 @@ int History::init()
 	return 0;
 }
 
-int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::vector<Score> scores)
+int History::add(GameId _gameId, DISKCOLORS _diskcolor, DISKCOLORS* _board, std::vector<Score> scores)
 {
 	logging.logout("History::add()開始. isGameIdValid = %d, 保存済みgameId.pid = %d, 指定gameId.pid = %d.",
 		isGameIdValid,
@@ -28,7 +28,7 @@ int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::
 	HistoryData historyData;
 
 	// diskcolorのセット
-	historyData.diskcolor = diskcolor;
+	historyData.diskcolor = _diskcolor;
 
 	// board内容のセット
 	memmove_s(&historyData.board, sizeof(historyData.board), _board, sizeof(historyData.board));
@@ -57,7 +57,7 @@ int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::
 
 	for (index = 0; index < historyDataList.size(); index++) {
 		// 既に指定されたgameIdのヒストリデータリストが存在する場合
-		if (historyDataList[index].gameId == _gameId) {
+		if (historyDataList[index].gameId == _gameId && historyDataList[index].diskcolor == _diskcolor) {
 			isHistoryListExist = true;
 			break;
 		}
@@ -77,6 +77,7 @@ int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::
 		HistoryDataList newHistoryDataList;
 
 		newHistoryDataList.gameId = _gameId;
+		newHistoryDataList.diskcolor = _diskcolor;
 		newHistoryDataList.historyData.push_back(historyData);
 
 		historyDataList.push_back(newHistoryDataList);
@@ -90,17 +91,17 @@ int History::add(GameId _gameId, DISKCOLORS diskcolor, DISKCOLORS* _board, std::
 	return 0;
 }
 
-int History::setValue(GameId _gameId, DISKCOLORS diskcolor, float _value)
+int History::setValue(GameId _gameId, DISKCOLORS _diskcolor, float _value)
 {
 	logging.logout("History::setValue() start.");
 
 	for (size_t i = 0; i < historyDataList.size(); i++) {
-		if (historyDataList[i].gameId == _gameId) {
+		if (historyDataList[i].gameId == _gameId && historyDataList[i].diskcolor == _diskcolor) {
 			logging.logout("value = %dをセットします.", _value);
 
 			// 現在保存されているヒストリ情報にvalue値をセットする
 			for (size_t j = 0; j < historyDataList[i].historyData.size(); j++) {
-				if (historyDataList[i].historyData[j].diskcolor == diskcolor) {
+				if (historyDataList[i].historyData[j].diskcolor == _diskcolor) {
 					historyDataList[i].historyData[j].value = _value;
 				}
 			}
@@ -109,7 +110,7 @@ int History::setValue(GameId _gameId, DISKCOLORS diskcolor, float _value)
 			logging.logout("学習データをファイルに出力します.");
 
 			int ret;
-			ret = outputFile(_gameId, diskcolor);
+			ret = outputFile(_gameId, _diskcolor);
 
 			if (ret < 0) {
 				return -1;
@@ -130,12 +131,12 @@ int History::setValue(GameId _gameId, DISKCOLORS diskcolor, float _value)
 	return -2;
 }
 
-int History::outputFile(GameId _gameId, DISKCOLORS diskcolor)
+int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 {
 	logging.logout("History::outputFile() start.");
 
 	for (size_t i = 0; i < historyDataList.size(); i++) {
-		if (historyDataList[i].gameId == _gameId) {
+		if (historyDataList[i].gameId == _gameId && historyDataList[i].diskcolor == _diskcolor) {
 			// ヒストリデータの有無を確認する
 			if (historyDataList[i].historyData.size() <= 0) {
 				return -1;
@@ -164,7 +165,7 @@ int History::outputFile(GameId _gameId, DISKCOLORS diskcolor)
 				localTime.tm_hour,
 				localTime.tm_min,
 				localTime.tm_sec,
-				diskcolor == DISKCOLORS::COLOR_BLACK ? 'B' : 'W'
+				_diskcolor == DISKCOLORS::COLOR_BLACK ? 'B' : 'W'
 			);
 
 			// ファイルをオープンする
@@ -180,7 +181,7 @@ int History::outputFile(GameId _gameId, DISKCOLORS diskcolor)
 			fwrite(&formatVersion, sizeof(formatVersion), 1, f);
 
 			for (size_t j = 0; j < historyDataList[i].historyData.size(); j++) {
-				if (historyDataList[i].historyData[j].diskcolor == diskcolor) {
+				if (historyDataList[i].historyData[j].diskcolor == _diskcolor) {
 					// 下で出力されるポリシー値・value値がどちらの石の色に対する値なのかを出力
 					fwrite(&historyDataList[i].historyData[j].diskcolor, sizeof(historyDataList[i].historyData[j].diskcolor), 1, f);
 

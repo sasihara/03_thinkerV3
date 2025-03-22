@@ -4,8 +4,6 @@
 #include "externalThinkerMessages.hpp"
 #include "TFHandler.hpp"
 
-#define DEBUG	0
-
 int load_model(Model *model)
 {
 	// Load Othello Deep Model
@@ -29,7 +27,7 @@ int load_model(Model *model)
 	}
 	else
 	{
-#if DEBUG
+#ifdef _DEBUG
 		printf("\n[info] While loading TensorFlow saved model, got: %s\n", TF_Message(model->Status));
 #endif
 	}
@@ -67,9 +65,9 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 		printf("ERROR: Failed TF_GraphOperationByName serving_default_input_1\n");
 	}
 	else {
-#if DEBUG
-		printf("TF_GraphOperationByName serving_default_input_1 is OK\n");
-#endif
+//#ifdef _DEBUG
+//		printf("TF_GraphOperationByName serving_default_input_1 is OK\n");
+//#endif
 	}
 
 	Input[0] = t0;
@@ -84,9 +82,9 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 	if (t1.oper == NULL)
 		printf("ERROR: Failed TF_GraphOperationByName StatefulPartitionedCall\n");
 	else {
-#if DEBUG
-		printf("TF_GraphOperationByName StatefulPartitionedCall is OK\n");
-#endif
+//#ifdef _DEBUG
+//		printf("TF_GraphOperationByName StatefulPartitionedCall is OK\n");
+//#endif
 	}
 
 	TF_Output t2 = { TF_GraphOperationByName(model->Graph, "StatefulPartitionedCall"), 1 };
@@ -94,9 +92,9 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 	if (t2.oper == NULL)
 		printf("ERROR: Failed TF_GraphOperationByName StatefulPartitionedCall\n");
 	else {
-#if DEBUG
-		printf("TF_GraphOperationByName StatefulPartitionedCall is OK\n");
-#endif
+//#ifdef _DEBUG
+//		printf("TF_GraphOperationByName StatefulPartitionedCall is OK\n");
+//#endif
 	}
 
 	Output[0] = t1;
@@ -143,9 +141,9 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 
 	if (TF_GetCode(model->Status) == TF_OK)
 	{
-#if DEBUG
-		printf("Session is OK\n");
-#endif
+//#ifdef _DEBUG
+//		printf("Session is OK\n");
+//#endif
 	}
 	else
 	{
@@ -174,8 +172,8 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 
 void NoOpDeallocator(void* data, size_t a, void* b)
 {
-#if DEBUG
-	printf("Deallocator called with data %p\n", data);
-#endif
+//#ifdef _DEBUG
+//	printf("Deallocator called with data %p\n", data);
+//#endif
 }
 

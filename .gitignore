@@ -355,3 +355,6 @@ MigrationBackup/
 /thinkerV3/thinkerV3_log_1223_3.txt
 /thinkerV3/tensorflow.dll
 /thinkerV3/tensorflow.dll.old
+*.bhs
+*.txt
+/thinkerV3/historyAnalizer.exe

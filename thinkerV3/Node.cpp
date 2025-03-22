@@ -187,7 +187,9 @@ int Node::get_next_child_node(Child** next_child_node)
 		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (double)(1 + child_node_list[i].node->n);
 		double pucb_value = pucb_value_1st + pucb_value_2nd;
 
-		LOGOUT(LOGLEVEL_TRACE, "n = %d, w = %.6f, p = %.6f, t = %d, C_PUCT = %.6f, w / n = %f, C_PUCT * p * sqrt(t) / (1 + n) = %.6f",
+		LOGOUT(LOGLEVEL_TRACE, "x = %d, y = %d : n = %d, w = %.6f, p = %.6f, t = %d, C_PUCT = %.6f, w / n = %f, C_PUCT * p * sqrt(t) / (1 + n) = %.6f",
+			child_node_list[i].x,
+			child_node_list[i].y,
 			child_node_list[i].node->n,
 			child_node_list[i].node->w,
 			child_node_list[i].node->p,

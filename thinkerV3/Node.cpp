@@ -54,6 +54,7 @@ int Node::evaluate(float *result)
 
 		if (gameResult == GAMERESULT_ERROR) return -1;
 		else if (gameResult == GAMERESULT_LOSE) value = -1.0;
+		else value = 0.0;
 
 		LOGOUT(LOGLEVEL_TRACE, "ƒQ[ƒ€Œ‹‰Ê = %s, value = %.6f", gameResult == GAMERESULT_WIN ? "Ÿ‚¿" : gameResult == GAMERESULT_LOSE ? "•‰‚¯" : "ˆø‚«•ª‚¯", value);
 
@@ -183,7 +184,7 @@ int Node::get_next_child_node(Child** next_child_node)
 	if (ret < 0) return -1;
 
 	for (size_t i = 0; i < child_node_list.size(); i++) {
-		double pucb_value_1st = child_node_list[i].node->n > 0 ? child_node_list[i].node->w / child_node_list[i].node->n : 0.0;
+		double pucb_value_1st = child_node_list[i].node->n > 0 ? -child_node_list[i].node->w / child_node_list[i].node->n : 0.0;
 		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (double)(1 + child_node_list[i].node->n);
 		double pucb_value = pucb_value_1st + pucb_value_2nd;
 

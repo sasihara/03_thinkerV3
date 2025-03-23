@@ -15,6 +15,7 @@ public:
 	int run(State *state, Action* action, GameId gameId);
 	int pv_mcts_scores(State *state, std::vector<Score>* scores);
 	int ranom_choice(State *state, std::vector<Score> scores, Action *action);
+
 private:
 	Model *model;
 	Temperature temperature;
@@ -22,3 +23,5 @@ private:
 
 	int bolzman(std::vector<Score>* scores, Temperature temperature);
 };
+
+bool compare(Score a, Score b);

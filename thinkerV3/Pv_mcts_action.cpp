@@ -1,4 +1,5 @@
 #include <float.h>
+#include <algorithm>
 #include "common.h"
 #include "Pv_mcts.action.hpp"
 #include "TFHandler.hpp"
@@ -197,6 +198,13 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action
 {
 	LOGOUT(LOGLEVEL_INFO, "ranom_choice()開始.");
 
+	// scoreの内容をコピーする
+	std::vector<Score> scoresSorted = scores;
+	
+	// scoresのprobabilityの大きい順にソートする
+	// 別にソートしなくてもprobability値の確率でその手が選択されるから、この処理は必須でないことに注意
+	std::sort(scoresSorted.begin(), scoresSorted.end(), compare);
+	
 	// 0～1までの乱数を生成する
 	double randomValue = (double)rand() / (double)RAND_MAX;
 
@@ -206,14 +214,14 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action
 	double sum = 0.0;
 	size_t x = 0, y = 0;
 
-	for (size_t i = 0; i < scores.size(); i++) {
-		sum += scores[i].probability;
+	for (size_t i = 0; i < scoresSorted.size(); i++) {
+		sum += scoresSorted[i].probability;
 
 		// 合計値が乱数値以上となった場合はその値を選択
 		// 確率分布の合計値は必ず最終的に乱数値の最大値の1.0となるので、必ず以下のif文が実行される
 		if (sum >= randomValue - DBL_EPSILON) {
-			x = scores[i].x;
-			y = scores[i].y;
+			x = scoresSorted[i].x;
+			y = scoresSorted[i].y;
 
 			LOGOUT(LOGLEVEL_TRACE, "%d番目の手を選択。", i + 1);
 
@@ -228,4 +236,9 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action
 	LOGOUT(LOGLEVEL_TRACE, "[ERROR] 入力された確率分布の積分値が1より小さいです。積分値 = %f。", sum);
 	LOGOUT(LOGLEVEL_INFO, "ranom_choice()終了.");
 	return -1;
+}
+
+bool compare(Score a, Score b)
+{
+	return(a.probability > b.probability);
 }

@@ -83,22 +83,22 @@ int main(int argc, char** argv)
 		}
 
 		while (feof(fIn) == 0) {
-			logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.diskcolor));
+			//logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.diskcolor));
 			count = fread_s(&historyData.diskcolor, sizeof(historyData.diskcolor), sizeof(historyData.diskcolor), 1, fIn);
 			if (count < 1) break;
 			sum += sizeof(historyData.diskcolor);
 
-			logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.board));
+			//logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.board));
 			count = fread_s(historyData.board, sizeof(historyData.board), sizeof(historyData.board), 1, fIn);
 			if (count < 1) break;
 			sum += sizeof(historyData.board);
 
-			logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.probability));
+			//logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.probability));
 			count = fread_s(historyData.probability, sizeof(historyData.probability), sizeof(historyData.probability), 1, fIn);
 			if (count < 1) throw -7;
 			sum += sizeof(historyData.probability);
 
-			logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.value));
+			//logging.logout("%d(0x%X)バイト目から%dバイト読み込み", sum, sum, sizeof(historyData.value));
 			count = fread_s(&historyData.value, sizeof(historyData.value), sizeof(historyData.value), 1, fIn);
 			if (count < 1) throw -8;
 			sum += sizeof(historyData.value);
@@ -106,20 +106,45 @@ int main(int argc, char** argv)
 			// board内容の出力
 			c = c + 1;
 			logging.logout("●No. %d", c);
-			logging.logout("プレイヤーの石の色: %s", historyData.diskcolor == DISKCOLORS::COLOR_BLACK ? "●" : historyData.diskcolor == DISKCOLORS::COLOR_WHITE ? "○" : "");
+			logging.logprintf("プレイヤーの石の色: %s\n\n", historyData.diskcolor == DISKCOLORS::COLOR_BLACK ? "●" : historyData.diskcolor == DISKCOLORS::COLOR_WHITE ? "○" : "");
 
 			ret = logoutBoard(logging, historyData.board);
 
 			// probalibityの出力
-			logging.logout("*** Probability ***");
-			for (size_t i = 0; i < 65; i++) {
-				logging.logprintf("%f, ", historyData.probability[i]);
+			logging.logprintf("\n*** Probability ***\n");
+			for (size_t x = 0; x < 8; x++) {
+				for (size_t y = 0; y < 8; y++) {
+					if (historyData.board[y * 8 + x] == DISKCOLORS::COLOR_BLACK) {
+						logging.logprintf("●", historyData.probability[y * 8 + x]);
+					}
+					else if (historyData.board[y * 8 + x] == DISKCOLORS::COLOR_WHITE) {
+						logging.logprintf("○", historyData.probability[y * 8 + x]);
+					}
+					else {
+						logging.logprintf("%2.0f", historyData.probability[y * 8 + x] * 100);
+					}
+					logging.logprintf(",");
+				}
+
+				logging.logprintf("\n");
 			}
 			logging.logprintf("\n");
 
+			logging.logprintf("(生データ)\n");
+			for (size_t i = 0; i < 65; i++) {
+				logging.logprintf("%.02f", historyData.probability[i]);
+				if (i % 8 == 7) {
+					logging.logprintf("\n");
+				}
+				else {
+					logging.logprintf(", ");
+				}
+			}
+			logging.logprintf("\n\n");
+
 			// value値の出力
-			logging.logout("*** Value ***");
-			logging.logout("%f", historyData.value);
+			logging.logprintf("*** Value ***\n");
+			logging.logprintf("%f\n\n", historyData.value);
 		}
 
 		// ファイルのクローズ

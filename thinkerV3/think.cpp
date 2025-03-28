@@ -14,7 +14,7 @@
 #include "State.hpp"
 #include "Pv_mcts.action.hpp"
 
-int Thinker::init()
+int Thinker::init(double _spTemperature)
 {
 	int ret;
 
@@ -36,6 +36,10 @@ int Thinker::init()
 		strcpy_s(modelInfo, sizeof(modelInfo), MODELINFO);
 	}
 
+	// 温度パラメータをセット
+	spTemperature = _spTemperature;
+
+	// リターン
 	isInitialized = true;
 
 	return 0;
@@ -43,7 +47,9 @@ int Thinker::init()
 
 Thinker::~Thinker()
 {
-	free_model(&model);
+	if (isInitialized == true) {
+		free_model(&model);
+	}
 }
 
 //
@@ -76,7 +82,7 @@ int Thinker::think(int turn, DISKCOLORS *board, int *place, GameId gameId)
 	Pv_mcts_action *next_action;
 	
 	try {
-		next_action = new Pv_mcts_action(&model, SP_TEMPERATURE);
+		next_action = new Pv_mcts_action(&model, spTemperature);
 	}
 	catch (...) {
 		return -3;

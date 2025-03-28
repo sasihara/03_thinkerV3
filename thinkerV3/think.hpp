@@ -18,7 +18,7 @@ typedef struct _POLICY {
 
 class Thinker {
 public:
-	int init();
+	int init(double _spTemperature);
 	int think(int turn, DISKCOLORS* board, int *place, GameId gameId);
 	char* getModelInfo();
 	~Thinker();
@@ -27,4 +27,5 @@ private:
 	boolean isInitialized = false;
 	Model model;
 	char modelInfo[1024];
+	double spTemperature = SP_TEMPERATURE;
 };

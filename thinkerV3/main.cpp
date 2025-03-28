@@ -36,6 +36,7 @@ int main(int argc, char **argv)
     char buf[4096];
     int messageLen;
     int ret;
+    double spTemperature = SP_TEMPERATURE;
 
     // Logging
 #ifdef _DEBUG
@@ -45,25 +46,45 @@ int main(int argc, char **argv)
 #endif
 
     // Parameter check
-    if (argc == 2) {
-        port = atoi(argv[1]);
+    try {
+        if (argc >= 1) {
+            for (int i = 1; i < argc; i++) {
+                if (argv[i][0] == '-') {
+                    switch (argv[i][1]) {
+                    case 'p':
+                        port = atoi(&argv[i][2]);
+                        if (port <= 1024) {
+                            throw - 1;
+                        }
+                        break;
+                    case 't':
+                        spTemperature = atof(&argv[i][2]);
+                        if (spTemperature < 0.0) throw - 2;
+                    }
+                }
+                else {
+                    throw - 3;
+                }
+            }
+        }
     }
-    else if (argc > 2) {
-        printf("\n\nUsage: thinkerV3.exe [port]\n\n");
-    }
+    catch(int ret){
+        printf("\n\nUsage: thinkerV3.exe [options]\n\n");
+        printf(" options:\n\n");
+        printf("  -p[port number]: Port number to listen. ""port number"" must be larger than or equal to 1024.\n");
+        printf("  -t[temperature]: Temperature (>= 0.0).\n");
+        printf("\n\n");
 
-    if (port <= 1024) {
-        printf("[ERROR] port number must be larger than 1024");
-        return -1;
+        return ret;
     }
 
     // 乱数の初期化
     srand((unsigned)time(0));
 
     // Thinkerの初期化
-    ret = thinker.init();
+    ret = thinker.init(spTemperature);
     if (ret < 0) {
-        return -2;
+        return -4;
     }
 
     // Initialize winsock
@@ -81,6 +102,7 @@ int main(int argc, char **argv)
     printf("\n");
     printf("%s\n", TEXTINFO);
     printf("Model = %s\n", thinker.getModelInfo());
+    printf("Temperature = %f\n", spTemperature);
     printf("Waiting requests at port = %d...\n", port);
 
     // Receive and handle messages until QUIT message is received

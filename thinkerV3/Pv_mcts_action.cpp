@@ -80,7 +80,7 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Score>* scores)
 
 	try {
 		for (int i = 0; i < PV_EVALUATE_COUNT; i++) {
-			LOGOUT(LOGLEVEL_TRACE, "%d‰ñ–Ú‚Ì•]‰¿‚ðŠJŽn.", i + 1);
+			LOGOUT(LOGLEVEL_TRACE, "===== š%d‰ñ–Ú‚Ì•]‰¿‚ðŠJŽn.š=====", i + 1);
 
 			float value;
 			ret = root_node->evaluate(&value);

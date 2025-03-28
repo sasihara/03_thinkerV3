@@ -150,8 +150,10 @@ int Node::evaluate(float *result)
 			return -9;
 		}
 
+		// ★原書の5章を読むと、value値に-1.0を掛けるような説明は無い。
+		// ★なぜ原書のPythonコードの方は-1を掛けているのか？？
 		// Update w, n
-		w -= value;			// w += -value;
+		w -= value;		// w = w + -1 * value
 		n += 1;
 		*result = value;
 
@@ -184,6 +186,8 @@ int Node::get_next_child_node(Child** next_child_node)
 	if (ret < 0) return -1;
 
 	for (size_t i = 0; i < child_node_list.size(); i++) {
+		// ★原書の6.3節の本文の説明を読むと、w値に-1.0を掛けるような説明は無い。
+		// ★なぜ原書のPythonコードの方は-1を掛けるのか？？
 		double pucb_value_1st = child_node_list[i].node->n > 0 ? -child_node_list[i].node->w / child_node_list[i].node->n : 0.0;
 		double pucb_value_2nd = C_PUCT * child_node_list[i].node->p * sqrt((double)t) / (double)(1 + child_node_list[i].node->n);
 		double pucb_value = pucb_value_1st + pucb_value_2nd;

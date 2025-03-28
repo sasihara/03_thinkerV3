@@ -78,6 +78,11 @@ int main(int argc, char **argv)
         return ret;
     }
 
+    logging.logout("***** Command Paramters ******");
+    logging.logout("Port Number = %d", port);
+    logging.logout("spTemperature = %f", spTemperature);
+    logging.logout("******************************");
+
     // 乱数の初期化
     srand((unsigned)time(0));
 

@@ -15,7 +15,7 @@ Microsoft Visual Studio Community 2022での動作を確認しております。
 - プロジェクトファイルはthinkerV3.slnです。Visual Studioでオープンしコンパイルすると、実行バイナリがx64\Releaseフォルダの下に作成されますので、それらをダブルクリックすることで実行できます。
 
 - 本思考ルーチンの実行には、tensorflow.dllが必要となります。[TensorFlow for C のインストール](https://www.tensorflow.org/install/lang_c?hl=ja)のページからダウンロードしてください。
-  - "セットアップ"節の下の"ダウンロード"の下にある"Windows、CPU のみ"もしくは"Windows、GPU のみ"のlibtensorflow-XXX-windows-x86_64-2.6.0.zipをダウンロードして解凍してください。解凍後、その中に含まれるtensorflow.dllをthinkerV3.exeと同じフォルダに格納してください。
+  - "セットアップ"節の下の"ダウンロード"の下にある"Windows、CPU のみ"もしくは"Windows、GPU のみ"のlibtensorflow-XXX-windows-x86_64-2.6.0.zipをダウンロードして解凍してください。解凍後、libtensorflow-cpu-windows-x86_64-2.6.0フォルダ一式を03_thinkerV3フォルダと同じフォルダに格納して下さい。また、その中に含まれるtensorflow.dllをthinkerV3.exeと同じフォルダに格納してください。
   - 上記tensorflow.dll 2.6.0のGPU版を動かすためには、さらに[CUDA](https://developer.nvidia.com/cuda-toolkit-archive)、[cuDNN](https://developer.nvidia.com/rdp/cudnn-archive)、zlibが必要となります。tensorflow.dll 2.6.0自体古いため、CUDA、cuDNNについては本ライブラリがリリースされた当時のバージョンを入れる必要があります。2022年8月ごろにリリースされたバージョン([CUDA 11.7.1](https://developer.nvidia.com/cuda-11-7-1-download-archive), [cuDNN 8.5.0 (August 8th, 2022) for CUDA 11.X](https://developer.nvidia.com/rdp/cudnn-archive))で動作することを確認しております。
 - thnkerV3.exeを実行すると、デフォルトではUDPポート番号60001でメッセージ待ち受け状態に入ります。"01_othello"プロジェクトに格納されるothello.exeを実行し、
 ボード上をクリックすることで表示されるゲームの初期設定画面において、"Computer(External)"にチェックを入れた後、黒もしくは白のHost Nameに"localhost"を、Portに"60001"をセットすることで、本思考ルーチンを用いてプレーすることができます。

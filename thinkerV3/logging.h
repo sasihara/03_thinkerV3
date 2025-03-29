@@ -3,6 +3,19 @@
 #include "stdarg.h"
 #include "limits.h"
 
+// デバッグマクロ
+#ifdef _DEBUG
+#define LOGOUT_INIT(level, path)	logging.init(level, path)
+#define LOGOUT(level, format, ...)	logging.logout(level, format, __VA_ARGS__)
+#define LOGOUT_FLUSH()				logging.flush()
+#define	LOGOUT_END()				logging.end()
+#else
+#define LOGOUT_INIT(level, path)
+#define LOGOUT(level, format, ...)
+#define LOGOUT_FLUSH()
+#define	LOGOUT_END()
+#endif
+
 enum LogLevel {
 	LOGLEVEL_CRITICAL = 0,
 	LOGLEVEL_ERROR,

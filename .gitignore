@@ -358,3 +358,4 @@ MigrationBackup/
 *.bhs
 *.txt
 /thinkerV3/historyAnalizer.exe
+/thinkerV3/04_OthelloDeepModel/

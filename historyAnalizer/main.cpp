@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "..\thinkerV3\logging.h"
-#include "..\thinkerV3\history.hpp"
+#include "logging.h"
+#include "history.hpp"
 
 #define FORMAT_VERSION_SUPPORTED	200
 

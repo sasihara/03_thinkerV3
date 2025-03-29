@@ -294,13 +294,13 @@ void HandleGameFinished(MessageParser messageParser, SOCKET sock, struct sockadd
     // resultが自身なら1.0、相手なら-1.0, 引き分けなら0.0
     switch (result) {
     case RESULT::WIN :
-        ret = history.setValue(gameId, diskcolor, 1.0);
+        ret = history.finish(gameId, diskcolor, 1.0);
         break;
     case RESULT::LOSE :
-        ret = history.setValue(gameId, diskcolor, -1.0);
+        ret = history.finish(gameId, diskcolor, -1.0);
         break;
     case RESULT::EVEN :
-        ret = history.setValue(gameId, diskcolor, 0.0);
+        ret = history.finish(gameId, diskcolor, 0.0);
         break;
     default:
         break;

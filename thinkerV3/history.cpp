@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <direct.h>
 #include "history.hpp"
 
 // Global
@@ -91,7 +92,7 @@ int History::add(GameId _gameId, DISKCOLORS _diskcolor, DISKCOLORS* _board, std:
 	return 0;
 }
 
-int History::setValue(GameId _gameId, DISKCOLORS _diskcolor, float _value)
+int History::finish(GameId _gameId, DISKCOLORS _diskcolor, float _value)
 {
 	logging.logout("History::setValue() start.");
 
@@ -142,6 +143,11 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 				return -1;
 			}
 
+			// 学習データ格納用フォルダを作成する
+			if (_mkdir("history") != 0) {
+				return -2;
+			}
+
 			// ファイル名を決定する
 			// ファイル名は"年月日時分秒石の色.hst"
 			time_t currentTime, ret;
@@ -149,16 +155,16 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 			char fileName[256];
 
 			ret = time(&currentTime);
-			if (ret < 0) return -1;
+			if (ret < 0) return -3;
 
 			errno_t err;
 			err = localtime_s(&localTime, &currentTime);
 
 			if (err) {
-				return -2;
+				return -4;
 			}
 
-			sprintf_s(fileName, "%04d%02d%02d%02d%02d%02d%c.bhs",
+			sprintf_s(fileName, "history\\%04d%02d%02d%02d%02d%02d%c.bhs",
 				localTime.tm_year + 1900,
 				localTime.tm_mon + 1,
 				localTime.tm_mday,
@@ -171,7 +177,7 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 			// ファイルをオープンする
 			FILE* f;
 			if (fopen_s(&f, fileName, "wb") != 0) {
-				return -1;
+				return -5;
 			}
 
 			// ファイルを書き込む
@@ -205,5 +211,5 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 	// 指定されたgameIdのヒストリデータが保存されてない場合
 	logging.logout("[WARNING] gameId = %d の学習データが無いのでファイル出力は行いません.", _gameId);
 	logging.logout("History::outputFile() finish.");
-	return -2;
+	return -6;
 }

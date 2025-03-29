@@ -62,7 +62,7 @@ int Node::evaluate(float *result)
 		// 参照した本のモンテカルロ法についての本文説明では、勝った場合は+1.0を返すとの説明、
 		// ただコードはそうなっていない。要検討。
 
-		w += value;
+		w += (double)value;
 		n += 1;
 		*result = value;
 		LOGOUT(LOGLEVEL_TRACE, "w <= %.6f, n <= %d, result = %.6f", w, n, *result);
@@ -111,10 +111,10 @@ int Node::evaluate(float *result)
 					if (ret < 0) return -6;
 
 					// 新しい盤面を持ったNodeインスタンスを作成
-					Node* child_node;
+					Node* childNode;
 					
 					try {
-						child_node = new Node(model, &next, policies[x * 8 + y]);
+						childNode = new Node(model, &next, policies[x * 8 + y]);
 					}
 					catch(...){
 						return -7;
@@ -124,7 +124,7 @@ int Node::evaluate(float *result)
 					Child child;
 					child.x = x;
 					child.y = y;
-					child.node = child_node;
+					child.node = childNode;
 					child_node_list.push_back(child);
 
 					LOGOUT(LOGLEVEL_TRACE, "child_node_listに追加しました.");

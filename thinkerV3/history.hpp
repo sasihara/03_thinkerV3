@@ -22,10 +22,10 @@ typedef struct _HISTORY_DATA_LIST {
 
 class History {
 public:
+	int init();
 	int add(GameId _gameId, DISKCOLORS _diskcolor, DISKCOLORS *_board, std::vector<Score> scores);
 	int finish(GameId _gameId, DISKCOLORS _diskcolor, float _value);
 private:
-	int init();
 	int outputFile(GameId _gameId, DISKCOLORS diskcolor);
 	std::vector<HistoryDataList> historyDataList;
 	GameId gameId;

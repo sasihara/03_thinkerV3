@@ -92,6 +92,9 @@ int main(int argc, char **argv)
         return -4;
     }
 
+    // Historyの初期化
+    history.init();
+
     // Initialize winsock
     WSAStartup(MAKEWORD(2, 0), &wsaData);
 

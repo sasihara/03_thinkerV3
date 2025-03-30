@@ -145,7 +145,7 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 
 			// 学習データ格納用フォルダを作成する
 			if (_mkdir("history") != 0) {
-				return -2;
+				if(errno != EEXIST) return -2;
 			}
 
 			// ファイル名を決定する

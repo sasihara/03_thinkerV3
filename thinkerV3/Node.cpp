@@ -54,6 +54,7 @@ int Node::evaluate(float *result)
 
 		if (gameResult == GAMERESULT_ERROR) return -1;
 		else if (gameResult == GAMERESULT_LOSE) value = -1.0;
+		else if (gameResult == GAMERESULT_WIN) value = 1.0;			// 25/4/6 試しで追加
 		else value = 0.0;
 
 		LOGOUT(LOGLEVEL_TRACE, "ゲーム結果 = %s, value = %.6f", gameResult == GAMERESULT_WIN ? "勝ち" : gameResult == GAMERESULT_LOSE ? "負け" : "引き分け", value);
@@ -173,13 +174,13 @@ int Node::get_next_child_node(Child** next_child_node)
 
 	// 試行回数が0の子ノードを探す
 	// 25/3/22 原書には無いコードなので一時的にコメントアウト
-	//for (size_t i = 0; i < child_node_list.size(); i++) {
-	//	if (child_node_list[i].node->n == 0) {
-	//		LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_node_list[i].x, child_node_list[i].y);
-	//		*next_child_node = &child_node_list[i];
-	//		return 0;
-	//	}
-	//}
+	for (size_t i = 0; i < child_node_list.size(); i++) {
+		if (child_node_list[i].node->n == 0) {
+			LOGOUT(LOGLEVEL_TRACE, "試行回数=0のノードが見つかったので、そのノードを優先して返します。i = %d, (x, y) = (%d, %d)", i, child_node_list[i].x, child_node_list[i].y);
+			*next_child_node = &child_node_list[i];
+			return 0;
+		}
+	}
 	
 	// パラメータt(合計値)を計算する
 	ret = sum_child_nodes(&t);

@@ -22,6 +22,8 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	int ret;
 	std::vector<Score> scores;
 
+	LOGOUT(LOGLEVEL_INFO, "========== Pv_mcts_action::run()開始. ==========");
+
 	// 盤面のログ出力
 	state->logout(logging);
 
@@ -58,6 +60,8 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	// ログ出力
 	logging.logout("現在の盤面は以下の通りです.");
 	state->logout(logging);
+
+	LOGOUT(LOGLEVEL_INFO, "========== Pv_mcts_action::run()終了. ==========");
 
 	// リターン
 	return 0;

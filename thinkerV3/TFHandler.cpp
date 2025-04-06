@@ -4,6 +4,8 @@
 #include "externalThinkerMessages.hpp"
 #include "TFHandler.hpp"
 
+extern Logging logging;
+
 int load_model(Model *model)
 {
 	// Load Othello Deep Model
@@ -53,6 +55,11 @@ int free_model(Model *model)
 int predict(Model *model, State _state, float* _policies, float* _value)
 {
 	int ret = 0;
+
+	LOGOUT(LOGLEVEL_INFO, "predict() start.");
+	logging.logprintf("プレイヤーの石の色: %s\n", _state.currentPlayer == DISKCOLORS::COLOR_BLACK ? "●" : _state.currentPlayer == DISKCOLORS::COLOR_WHITE ? "○" : "");
+	logging.logprintf("対戦相手の石の色: %s\n", _state.opponent == DISKCOLORS::COLOR_BLACK ? "●" : _state.opponent == DISKCOLORS::COLOR_WHITE ? "○" : "");
+	ret = logoutBoard(logging, _state.board);
 
 	// Define a input for the othello inference model
 	int NumInputs = 1;
@@ -124,7 +131,12 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 			if (_state.board[i / 2] == _state.opponent) in1_data[i] = 1.0;
 			else in1_data[i] = 0.0;
 		}
+
+		if(i % 2 == 0) logging.logprintf("[%.0f,", in1_data[i]);
+		else logging.logprintf("%.0f],", in1_data[i]);
+		if (i % 16 == 15) logging.logprintf("\n");
 	}
+	logging.logprintf("\n");
 
 	TF_Tensor* tensor0 = TF_NewTensor(TF_FLOAT, in1_dims, in1_ndims, in1_data, in1_ndata, &NoOpDeallocator, NULL);
 
@@ -167,6 +179,8 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 	free(InputValues);
 	free(OutputValues);
 
+	logging.logprintf("value: %f\n", *_value);
+	LOGOUT(LOGLEVEL_INFO, "predict() finished.");
 	return ret;
 }
 

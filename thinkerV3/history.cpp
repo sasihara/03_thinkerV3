@@ -164,14 +164,15 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 				return -4;
 			}
 
-			sprintf_s(fileName, "history\\%04d%02d%02d%02d%02d%02d%c.bhs",
+			sprintf_s(fileName, "history\\%04d%02d%02d%02d%02d%02d%c_%d.bhs",
 				localTime.tm_year + 1900,
 				localTime.tm_mon + 1,
 				localTime.tm_mday,
 				localTime.tm_hour,
 				localTime.tm_min,
 				localTime.tm_sec,
-				_diskcolor == DISKCOLORS::COLOR_BLACK ? 'B' : 'W'
+				_diskcolor == DISKCOLORS::COLOR_BLACK ? 'B' : 'W',
+				_gameId.pid
 			);
 
 			// ファイルをオープンする

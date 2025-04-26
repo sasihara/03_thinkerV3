@@ -100,6 +100,9 @@ int Thinker::think(int turn, DISKCOLORS *board, int *place, GameId gameId)
 	// Delete next_action
 	delete(next_action);
 
+	// Delete state
+	delete state;
+
 	return 0;
 }
 

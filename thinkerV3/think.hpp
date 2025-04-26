@@ -24,7 +24,7 @@ public:
 	~Thinker();
 
 private:
-	boolean isInitialized = false;
+	bool isInitialized = false;
 	Model model;
 	char modelInfo[1024];
 	double spTemperature = SP_TEMPERATURE;

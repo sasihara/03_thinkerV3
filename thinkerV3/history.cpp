@@ -8,11 +8,14 @@ extern Logging logging;
 
 int History::init()
 {
-	for (size_t i = 0; i < historyDataList.size(); i++) {
-		historyDataList[i].historyData.clear();
+	for (size_t i = 0; i < MAX_NUM_HIST_DATA_SET; i++) {
+		for (size_t j = 0; j < MAX_NUM_HISTORY_DATA; j++) {
+			historyDataSets[i].historyData[j].isValid = false;
+		}
+		historyDataSets[i].isValid = false;
 	}
 
-	historyDataList.clear();
+	histDataSetSeqId = 0;
 
 	return 0;
 }
@@ -26,39 +29,18 @@ int History::add(GameId _gameId, DISKCOLORS _diskcolor, DISKCOLORS* _board, std:
 		);
 
 	// HistoryDataの準備
-	HistoryData historyData;
-
-	// diskcolorのセット
-	historyData.diskcolor = _diskcolor;
-
-	// board内容のセット
-	memmove_s(&historyData.board, sizeof(historyData.board), _board, sizeof(historyData.board));
-
-	// probabilityのセット
-	// ベクタ型scoresに格納されるprobability値を_probability配列へ格納する
-	double probability[DN_OUTPUT_SIZE];
-	memset(probability, 0, sizeof(probability));
-
-	for (size_t i = 0; i < scores.size(); i++) {
-		int idx = scores[i].x * 8 + scores[i].y;
-
-		if (idx < DN_OUTPUT_SIZE) {
-			probability[idx] = scores[i].probability;
-		}
-	}
-
-	memmove_s(&historyData.probability, sizeof(historyData.probability), probability, sizeof(probability));
-
-	// value値の初期化
-	historyData.value = 0.0;
+	HistoryData *historyData;
 
 	// 該当のgameIdのヒストリが既に存在するか？
 	bool isHistoryListExist = false;
 	size_t index = 0;
 
-	for (index = 0; index < historyDataList.size(); index++) {
+	for (index = 0; index < MAX_NUM_HIST_DATA_SET; index++) {
 		// 既に指定されたgameIdのヒストリデータリストが存在する場合
-		if (historyDataList[index].gameId == _gameId && historyDataList[index].diskcolor == _diskcolor) {
+		if (historyDataSets[index].isValid == true && 
+			historyDataSets[index].gameId == _gameId && 
+			historyDataSets[index].diskcolor == _diskcolor) {
+			
 			isHistoryListExist = true;
 			break;
 		}
@@ -68,24 +50,52 @@ int History::add(GameId _gameId, DISKCOLORS _diskcolor, DISKCOLORS* _board, std:
 	// ヒストリデータリストが見つからなかった場合は新しく作ってそこに格納
 	if (isHistoryListExist == false) {
 		// すでに規定数以上のトランザクション数のヒストリデータが保存されていれば先頭の学習データを消す
-		if (historyDataList.size() >= MAX_NUM_TRANSAC_HIST) {
-			// historyDataListの先頭を削除
-			historyDataList.begin()->historyData.clear();
-			historyDataList.erase(historyDataList.begin());
+		// 次の格納場所を初期化
+		for (size_t i = 0; i < MAX_NUM_HISTORY_DATA; i++) {
+			historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].historyData[i].isValid = false;
 		}
-			
+
+		// isValidフラグ更新
+		historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].isValid = true;
+
 		// 新しいトランザクションのヒストリデータを保存する
-		HistoryDataList newHistoryDataList;
+		historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].gameId = _gameId;
+		historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].diskcolor = _diskcolor;
+		historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].numHistoryData = 1;
 
-		newHistoryDataList.gameId = _gameId;
-		newHistoryDataList.diskcolor = _diskcolor;
-		newHistoryDataList.historyData.push_back(historyData);
+		historyData = &historyDataSets[histDataSetSeqId % MAX_NUM_HIST_DATA_SET].historyData[0];
 
-		historyDataList.push_back(newHistoryDataList);
+		// ヒストリデータセットのシーケンス番号を1つ進める
+		histDataSetSeqId++;
 	}
 	else {
-		historyDataList[index].historyData.push_back(historyData);
+		historyData = &historyDataSets[index].historyData[historyDataSets[index].numHistoryData];
+		historyDataSets[index].numHistoryData++;
 	}
+
+	// diskcolorのセット
+	historyData->diskcolor = _diskcolor;
+
+	// board内容のセット
+	memmove_s(&historyData->board, sizeof(historyData->board), _board, sizeof(historyData->board));
+
+	// probabilityのセット
+	// ベクタ型scoresに格納されるprobability値を_probability配列へ格納する
+	memset(historyData->probability, 0, sizeof(historyData->probability));
+
+	for (size_t i = 0; i < scores.size(); i++) {
+		int idx = scores[i].x * 8 + scores[i].y;
+
+		if (idx < DN_OUTPUT_SIZE) {
+			historyData->probability[idx] = scores[i].probability;
+		}
+	}
+
+	// value値の初期化
+	historyData->value = 0.0;
+
+	// isValidフラグをセット
+	historyData->isValid = true;
 
 	logging.logout("ヒストリデータを保存しました.");
 
@@ -96,14 +106,19 @@ int History::finish(GameId _gameId, DISKCOLORS _diskcolor, float _value)
 {
 	logging.logout("History::setValue() start.");
 
-	for (size_t i = 0; i < historyDataList.size(); i++) {
-		if (historyDataList[i].gameId == _gameId && historyDataList[i].diskcolor == _diskcolor) {
+	for (size_t i = 0; i < MAX_NUM_HIST_DATA_SET; i++) {
+		if (historyDataSets[i].isValid == true && 
+			historyDataSets[i].gameId == _gameId && 
+			historyDataSets[i].diskcolor == _diskcolor) {
+			
 			logging.logout("value = %dをセットします.", _value);
 
 			// 現在保存されているヒストリ情報にvalue値をセットする
-			for (size_t j = 0; j < historyDataList[i].historyData.size(); j++) {
-				if (historyDataList[i].historyData[j].diskcolor == _diskcolor) {
-					historyDataList[i].historyData[j].value = _value;
+			for (size_t j = 0; j < historyDataSets[i].numHistoryData; j++) {
+				if (historyDataSets[i].historyData[j].isValid == true && 
+					historyDataSets[i].historyData[j].diskcolor == _diskcolor) {
+					
+					historyDataSets[i].historyData[j].value = _value;
 				}
 			}
 
@@ -118,8 +133,10 @@ int History::finish(GameId _gameId, DISKCOLORS _diskcolor, float _value)
 			}
 
 			// データを削除する
-			historyDataList[i].historyData.clear();
-			historyDataList.erase(historyDataList.begin() + i);
+			for (size_t j = 0; j < MAX_NUM_HISTORY_DATA; j++)
+				historyDataSets[i].historyData[j].isValid = false;
+
+			historyDataSets[i].isValid = false;
 
 			logging.logout("History::setValue() finish.");
 			return 0;
@@ -136,10 +153,13 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 {
 	logging.logout("History::outputFile() start.");
 
-	for (size_t i = 0; i < historyDataList.size(); i++) {
-		if (historyDataList[i].gameId == _gameId && historyDataList[i].diskcolor == _diskcolor) {
+	for (size_t i = 0; i < MAX_NUM_HIST_DATA_SET; i++) {
+		if (historyDataSets[i].isValid == true && 
+			historyDataSets[i].gameId == _gameId && 
+			historyDataSets[i].diskcolor == _diskcolor) {
+			
 			// ヒストリデータの有無を確認する
-			if (historyDataList[i].historyData.size() <= 0) {
+			if (historyDataSets[i].numHistoryData <= 0) {
 				return -1;
 			}
 
@@ -187,19 +207,19 @@ int History::outputFile(GameId _gameId, DISKCOLORS _diskcolor)
 			// フォーマットバージョン
 			fwrite(&formatVersion, sizeof(formatVersion), 1, f);
 
-			for (size_t j = 0; j < historyDataList[i].historyData.size(); j++) {
-				if (historyDataList[i].historyData[j].diskcolor == _diskcolor) {
+			for (size_t j = 0; j < historyDataSets[i].numHistoryData; j++) {
+				if (historyDataSets[i].historyData[j].diskcolor == _diskcolor) {
 					// 下で出力されるポリシー値・value値がどちらの石の色に対する値なのかを出力
-					fwrite(&historyDataList[i].historyData[j].diskcolor, sizeof(historyDataList[i].historyData[j].diskcolor), 1, f);
+					fwrite(&historyDataSets[i].historyData[j].diskcolor, sizeof(historyDataSets[i].historyData[j].diskcolor), 1, f);
 
 					// 盤面の書き込み
-					fwrite(historyDataList[i].historyData[j].board, sizeof(historyDataList[i].historyData[j].board), 1, f);
+					fwrite(historyDataSets[i].historyData[j].board, sizeof(historyDataSets[i].historyData[j].board), 1, f);
 
 					// ポリシー値の書き込み
-					fwrite(historyDataList[i].historyData[j].probability, sizeof(historyDataList[i].historyData[j].probability), 1, f);
+					fwrite(historyDataSets[i].historyData[j].probability, sizeof(historyDataSets[i].historyData[j].probability), 1, f);
 
 					// value値の書き込み
-					fwrite(&historyDataList[i].historyData[j].value, sizeof(historyDataList[i].historyData[j].value), 1, f);
+					fwrite(&historyDataSets[i].historyData[j].value, sizeof(historyDataSets[i].historyData[j].value), 1, f);
 				}
 			}
 

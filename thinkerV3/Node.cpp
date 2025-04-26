@@ -32,6 +32,8 @@ Node::~Node()
 	for (size_t i = 0; i < n; i++) {
 		delete child_node_list[i].node;
 	}
+
+	child_node_list.clear();
 }
 
 int Node::evaluate(float *result)

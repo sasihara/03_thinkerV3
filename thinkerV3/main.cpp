@@ -233,7 +233,7 @@ void HandleThinkRequest(MessageParser messageParser, SOCKET sock, struct sockadd
     int tlvHead = sizeof(MESSAGEHEADER);       // tlvHead: TLV head pos to be processed
     DISKCOLORS board[64];
     int turn = 0;
-    int id = 0;
+    unsigned int id = 0;
     static GameId gameId;
     static bool prevGameIdAvail = false;
     int ret;

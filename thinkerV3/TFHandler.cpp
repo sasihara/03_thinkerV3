@@ -174,9 +174,13 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 	*_value = result2[0];
 
 	// free memory
+	TF_DeleteTensor(tensor0);
 	free(Input);
-	free(Output);
 	free(InputValues);
+
+	TF_DeleteTensor(OutputValues[0]);
+	TF_DeleteTensor(OutputValues[1]);
+	free(Output);
 	free(OutputValues);
 
 	logging.logprintf("value: %f\n", *_value);

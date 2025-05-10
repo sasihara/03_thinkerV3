@@ -13,6 +13,10 @@
 #include "TFHandler.hpp"
 #include "State.hpp"
 #include "Pv_mcts.action.hpp"
+#include "thinkV1.hpp"
+#include "history.hpp"
+
+extern History history;
 
 int Thinker::init(double _spTemperature)
 {
@@ -64,44 +68,86 @@ Thinker::~Thinker()
 //
 int Thinker::think(int turn, DISKCOLORS *board, int *place, GameId gameId)
 {
+	ThinkerV1 thinkerV1;
 	int ret = 0;
 
-	// Stateオブジェクトの生成
-	State* state;
+	// Decide thinking mode.
+	int numSpaceLeft;
+	numSpaceLeft = CountDisk(DISKCOLORS::COLOR_NONE, board);
+	LOGOUT(LOGLEVEL_TRACE, "残り石数 = %d.", numSpaceLeft);
 
-	try {
-		state = new State;
+	if (numSpaceLeft <= NUM_FOR_GAMESTATE_END) {
+		// thinkerV1(=完全読みモード)で思考
+		// thinkerV1の初期化
+		ret = thinkerV1.SetParams(turn, board);
+		if (ret < 0) return -1;
+
+		ret = thinkerV1.think();
+		if (ret < 0) return -2;
+
+		*place = ret;
+
+		// Add to History
+		DISKCOLORS boardToHistory[64];
+		memmove_s(boardToHistory, sizeof(boardToHistory), board, sizeof(DISKCOLORS) * 64);
+
+		if (ret < 0) return -1;
+
+		std::vector<Score> scoresList;
+		Score score;
+		score.x = *place / 10;
+		score.y = *place % 10;
+		score.n = 0;
+		score.probability = 1.0;
+		try {
+			scoresList.push_back(score);
+		}
+		catch (...) {
+			return -2;
+		}
+
+		ret = history.add(gameId, CURRENTPLAYER(turn), boardToHistory, scoresList);
+		if (ret < 0) return -3;
 	}
-	catch (...) {
-		return -2;
+	else {
+		// Deep Learningベースで思考
+		// Stateオブジェクトの生成
+		State* state;
+
+		try {
+			state = new State;
+		}
+		catch (...) {
+			return -4;
+		}
+
+		state->init(board, CURRENTPLAYER(turn));
+
+		// pv_mcts_actionオブジェクトの生成
+		Pv_mcts_action* next_action;
+
+		try {
+			next_action = new Pv_mcts_action(&model, spTemperature);
+		}
+		catch (...) {
+			return -5;
+		}
+
+		// 次の手を得る
+		Action action;
+		ret = next_action->run(state, &action, gameId);
+
+		if (ret < 0) return -6;
+
+		// Set the best place to "place"
+		*place = (int)action;
+
+		// Delete next_action
+		delete(next_action);
+
+		// Delete state
+		delete state;
 	}
-
-	state->init(board, CURRENTPLAYER(turn));
-
-	// pv_mcts_actionオブジェクトの生成
-	Pv_mcts_action *next_action;
-	
-	try {
-		next_action = new Pv_mcts_action(&model, spTemperature);
-	}
-	catch (...) {
-		return -3;
-	}
-
-	// 次の手を得る
-	Action action;
-	ret = next_action->run(state, &action, gameId);
-
-	if (ret < 0) return -4;
-
-	// Set the best place to "place"
-	*place = (int)action;
-
-	// Delete next_action
-	delete(next_action);
-
-	// Delete state
-	delete state;
 
 	return 0;
 }
@@ -109,4 +155,14 @@ int Thinker::think(int turn, DISKCOLORS *board, int *place, GameId gameId)
 char* Thinker::getModelInfo()
 {
 	return modelInfo;
+}
+
+int Thinker::CountDisk(DISKCOLORS color, DISKCOLORS _board[64])
+{
+	int c = 0, i;
+
+	for (i = 0; i < 64; i++) {
+		if (_board[i] == color) c++;
+	}
+	return c;
 }

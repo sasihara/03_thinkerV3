@@ -161,6 +161,7 @@
     <ClCompile Include="State.cpp" />
     <ClCompile Include="TFHandler.cpp" />
     <ClCompile Include="think.cpp" />
+    <ClCompile Include="thinkV1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\othello\common\externalThinkerMessages.hpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="State.hpp" />
     <ClInclude Include="TFHandler.hpp" />
     <ClInclude Include="think.hpp" />
+    <ClInclude Include="thinkV1.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

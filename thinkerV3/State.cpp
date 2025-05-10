@@ -1,6 +1,7 @@
 #include <string.h>
 #include "State.hpp"
 #include "logging.h"
+#include "thinkV1.hpp"
 
 State::State()
 {
@@ -292,25 +293,25 @@ int State::logout(Logging logging)
 //
 //	return ret;
 //}
-
-int logoutBoard(Logging logging, DISKCOLORS* _board)
-{
-	for (int y = 0; y < 8; y++) {
-		for (int x = 0; x < 8; x++) {
-			switch (_board[x * 8 + y]) {
-			case DISKCOLORS::COLOR_BLACK:
-				logging.logprintf(LOGLEVEL_TRACE, "œ");
-				break;
-			case DISKCOLORS::COLOR_WHITE:
-				logging.logprintf(LOGLEVEL_TRACE, "›");
-				break;
-			default:
-				logging.logprintf(LOGLEVEL_TRACE, "E");
-				break;
-			}
-		}
-		logging.logprintf(LOGLEVEL_TRACE, "\n");
-	}
-
-	return 0;
-}
+//
+//int logoutBoard(Logging logging, DISKCOLORS* _board)
+//{
+//	for (int y = 0; y < 8; y++) {
+//		for (int x = 0; x < 8; x++) {
+//			switch (_board[x * 8 + y]) {
+//			case DISKCOLORS::COLOR_BLACK:
+//				logging.logprintf(LOGLEVEL_TRACE, "œ");
+//				break;
+//			case DISKCOLORS::COLOR_WHITE:
+//				logging.logprintf(LOGLEVEL_TRACE, "›");
+//				break;
+//			default:
+//				logging.logprintf(LOGLEVEL_TRACE, "E");
+//				break;
+//			}
+//		}
+//		logging.logprintf(LOGLEVEL_TRACE, "\n");
+//	}
+//
+//	return 0;
+//}

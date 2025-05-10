@@ -28,4 +28,5 @@ private:
 	Model model;
 	char modelInfo[1024];
 	double spTemperature = SP_TEMPERATURE;
+	int CountDisk(DISKCOLORS color, DISKCOLORS _board[64]);
 };

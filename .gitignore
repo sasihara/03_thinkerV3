@@ -359,3 +359,12 @@ MigrationBackup/
 *.txt
 /thinkerV3/historyAnalizer.exe
 /thinkerV3/04_OthelloDeepModel/
+/thinkerV3/04_OthelloDeepModel/best.h5
+/thinkerV3/04_OthelloDeepModel/MODELINFO.txt
+/thinkerV3/04_OthelloDeepModel/best/variables/variables.data-00000-of-00002
+/thinkerV3/04_OthelloDeepModel/best/variables/variables.data-00001-of-00002
+/thinkerV3/04_OthelloDeepModel/best/variables/variables.index
+/thinkerV3/04_OthelloDeepModel/best/saved_model.pb
+/historyAnalizer/historyAnalizer.vcxproj
+/historyAnalizer/historyAnalizer.vcxproj.filters
+/thinkerV3/history/historyAnalizer.exe

@@ -45,6 +45,9 @@
     <ClCompile Include="history.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="thinkV1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="think.hpp">
@@ -81,6 +84,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="history.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="thinkV1.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

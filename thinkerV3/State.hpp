@@ -33,4 +33,4 @@ private:
 	int turnDiskOneDir(int xPos, int yPos, DISKCOLORS diceColor, int xStep, int yStep);
 };
 
-int logoutBoard(Logging logging, DISKCOLORS* _board);
+//int logoutBoard(Logging logging, DISKCOLORS* _board);

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "logging.h"
 #include "history.hpp"
+#include "thinkV1.hpp"
 
 #define FORMAT_VERSION_SUPPORTED	200
 

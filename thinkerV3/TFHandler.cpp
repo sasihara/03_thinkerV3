@@ -3,6 +3,7 @@
 #include "tensorflow\c\c_api.h"
 #include "externalThinkerMessages.hpp"
 #include "TFHandler.hpp"
+#include "thinkV1.hpp"
 
 extern Logging logging;
 

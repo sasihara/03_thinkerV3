@@ -22,7 +22,7 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	int ret;
 	std::vector<Score> scores;
 
-	LOGOUT(LOGLEVEL_INFO, "========== Pv_mcts_action::run()開始. ==========");
+	LOGOUT(LOGLEVEL_TRACE, "========== Pv_mcts_action::run()開始. ==========");
 
 	// 盤面のログ出力
 	state->logout(logging);
@@ -61,7 +61,7 @@ int Pv_mcts_action::run(State* state, Action* action, GameId gameId)
 	logging.logout("現在の盤面は以下の通りです.");
 	state->logout(logging);
 
-	LOGOUT(LOGLEVEL_INFO, "========== Pv_mcts_action::run()終了. ==========");
+	LOGOUT(LOGLEVEL_TRACE, "========== Pv_mcts_action::run()終了. ==========");
 
 	// リターン
 	return 0;
@@ -71,7 +71,7 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Score>* scores)
 {
 	int ret;
 
-	LOGOUT(LOGLEVEL_INFO, "pv_mcts_scores()開始.");
+	LOGOUT(LOGLEVEL_TRACE, "pv_mcts_scores()開始.");
 
 	Node* root_node;
 	
@@ -151,7 +151,7 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Score>* scores)
 		}
 	}
 
-	LOGOUT(LOGLEVEL_INFO, "pv_mcts_scores()終了.");
+	LOGOUT(LOGLEVEL_TRACE, "pv_mcts_scores()終了.");
 
 	//	return scores
 	return 0;
@@ -159,16 +159,16 @@ int Pv_mcts_action::pv_mcts_scores(State* state, std::vector<Score>* scores)
 
 int Pv_mcts_action::bolzman(std::vector<Score>* scores, Temperature temperature)
 {
-	LOGOUT(LOGLEVEL_INFO, "bolzman()開始. temperature=%.6f", temperature);
+	LOGOUT(LOGLEVEL_TRACE, "bolzman()開始. temperature=%.6f", temperature);
 
 	double sum = 0.0;
 
-	LOGOUT(LOGLEVEL_INFO, "bolzman()開始.");
+	LOGOUT(LOGLEVEL_TRACE, "bolzman()開始.");
 	LOGOUT(LOGLEVEL_TRACE, "----- 回数→ボルツマン分布値変換 -----");
 	//xs = [x * *(1 / temperature) for x in xs]
 	for (size_t i = 0; i < scores->size(); i++) {
 		scores->at(i).probability = pow((double)scores->at(i).n, 1.0 / temperature);
-		LOGOUT(LOGLEVEL_TRACE, "%d: (x =%d, y = %d) %.6f => %.6f", i + 1, scores->at(i).x, scores->at(i).y, (double)scores->at(i).n, scores->at(i).probability);
+		LOGOUT(LOGLEVEL_INFO, "%d: (x =%d, y = %d) %.6f => %.6f", i + 1, scores->at(i).x, scores->at(i).y, (double)scores->at(i).n, scores->at(i).probability);
 
 		sum += scores->at(i).probability;
 	}
@@ -180,7 +180,7 @@ int Pv_mcts_action::bolzman(std::vector<Score>* scores, Temperature temperature)
 		LOGOUT(LOGLEVEL_TRACE, "%d: (x =%d, y = %d) => %.6f", i + 1, scores->at(i).x, scores->at(i).y, scores->at(i).probability);
 	}
 
-	LOGOUT(LOGLEVEL_INFO, "bolzman()終了.");
+	LOGOUT(LOGLEVEL_TRACE, "bolzman()終了.");
 	return 0;
 }
 
@@ -200,7 +200,7 @@ int Pv_mcts_action::bolzman(std::vector<Score>* scores, Temperature temperature)
 // 
 int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action* action)
 {
-	LOGOUT(LOGLEVEL_INFO, "ranom_choice()開始.");
+	LOGOUT(LOGLEVEL_TRACE, "ranom_choice()開始.");
 
 	// scoreの内容をコピーする
 	std::vector<Score> scoresSorted = scores;
@@ -231,14 +231,14 @@ int Pv_mcts_action::ranom_choice(State *state, std::vector<Score> scores, Action
 
 			*action = (int)x * 10 + (int)y;
 
-			LOGOUT(LOGLEVEL_INFO, "ranom_choice()終了. 打ち手はx = %d, y = %d です.", x, y);
+			LOGOUT(LOGLEVEL_TRACE, "ranom_choice()終了. 打ち手はx = %d, y = %d です.", x, y);
 			return 0;
 		}
 	}
 
 	// 確率分布の合計値が1.0未満で本来はあり得ない。この場合はエラーとして返す。
 	LOGOUT(LOGLEVEL_TRACE, "[ERROR] 入力された確率分布の積分値が1より小さいです。積分値 = %f。", sum);
-	LOGOUT(LOGLEVEL_INFO, "ranom_choice()終了.");
+	LOGOUT(LOGLEVEL_TRACE, "ranom_choice()終了.");
 	return -1;
 }
 

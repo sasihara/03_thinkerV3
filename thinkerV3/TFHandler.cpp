@@ -57,7 +57,7 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 {
 	int ret = 0;
 
-	LOGOUT(LOGLEVEL_INFO, "predict() start.");
+	LOGOUT(LOGLEVEL_TRACE, "predict() start.");
 	logging.logprintf("プレイヤーの石の色: %s\n", _state.currentPlayer == DISKCOLORS::COLOR_BLACK ? "●" : _state.currentPlayer == DISKCOLORS::COLOR_WHITE ? "○" : "");
 	logging.logprintf("対戦相手の石の色: %s\n", _state.opponent == DISKCOLORS::COLOR_BLACK ? "●" : _state.opponent == DISKCOLORS::COLOR_WHITE ? "○" : "");
 	ret = logoutBoard(logging, _state.board);
@@ -185,7 +185,7 @@ int predict(Model *model, State _state, float* _policies, float* _value)
 	free(OutputValues);
 
 	logging.logprintf("value: %f\n", *_value);
-	LOGOUT(LOGLEVEL_INFO, "predict() finished.");
+	LOGOUT(LOGLEVEL_TRACE, "predict() finished.");
 	return ret;
 }
 

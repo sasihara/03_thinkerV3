@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 		printf("出力ファイル名: %s\n", logFileName);
 
 		// ログファイルのオープン
-		logging.init(9, logFileName);
+		logging.init(LOGLEVEL, logFileName);
 	}
 	catch (int ret) {
 		printf("\n[ERROR] %sのオープンに失敗.\n\n", logFileName);

@@ -4,7 +4,7 @@
 #include "TFHandler.hpp"
 
 #define	VERSION		309
-#define	TEXTINFO	"Othello Thinker V3.09(Alpha Go Based)"
+#define	TEXTINFO	"Othello Thinker V3.10(Alpha Go Based)"
 
 void HandleInformationRequest(MessageParser messageParser, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size);
 void HandleThinkRequest(MessageParser messageParser, SOCKET sock, struct sockaddr_in from, int sockaddr_in_size);

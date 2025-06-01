@@ -17,6 +17,7 @@
 #include "history.hpp"
 
 extern History history;
+extern Logging logging;
 
 int Thinker::init(double _spTemperature)
 {

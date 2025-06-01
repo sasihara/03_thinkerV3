@@ -3,6 +3,11 @@
 #include "stdarg.h"
 #include "limits.h"
 
+// ログレベル
+#ifndef LOGLEVEL
+#define	LOGLEVEL	LOGLEVEL_INFO
+#endif
+
 // デバッグマクロ
 #ifdef _DEBUG
 #define LOGOUT_INIT(level, path)	logging.init(level, path)

@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 
     // Logging
 #ifdef _DEBUG
-    LOGOUT_INIT(LOGLEVEL_ALL, "thinkerV3_log.txt");
+    LOGOUT_INIT(LOGLEVEL, "thinkerV3_log.txt");
 #else
     LOGOUT_INIT(LOGLEVEL_WARNING, "thinkerV3_log.txt");
 #endif

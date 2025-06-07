@@ -4,7 +4,7 @@
 #include "Node.hpp"
 //#include "history.hpp"
 
-#define PV_EVALUATE_COUNT 50
+#define PV_EVALUATE_COUNT 100
 
 typedef double	Temperature;
 typedef int		Action;

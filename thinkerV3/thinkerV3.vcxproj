@@ -151,10 +151,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\01_othello\common\logging.cpp" />
     <ClCompile Include="..\..\01_othello\common\messageGenerator.cpp" />
     <ClCompile Include="..\..\01_othello\common\messageParser.cpp" />
     <ClCompile Include="history.cpp" />
-    <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="Pv_mcts_action.cpp" />
@@ -165,11 +165,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\01_othello\common\externalThinkerMessages.hpp" />
+    <ClInclude Include="..\..\01_othello\common\logging.h" />
     <ClInclude Include="..\..\01_othello\common\messageGenerator.hpp" />
     <ClInclude Include="..\..\01_othello\common\messageParser.hpp" />
     <ClInclude Include="common.h" />
     <ClInclude Include="history.hpp" />
-    <ClInclude Include="logging.h" />
     <ClInclude Include="main.hpp" />
     <ClInclude Include="Node.hpp" />
     <ClInclude Include="Pv_mcts.action.hpp" />

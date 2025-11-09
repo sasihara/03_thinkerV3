@@ -115,7 +115,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH;LOGLEVEL=LOGLEVEL_ALL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\libtensorflow-cpu-windows-x86_64-2.6.0\include;..\..\01_othello\common;..\..\01_othello\othello</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
@@ -134,7 +134,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH;LOGLEVEL=LOGLEVEL_CRITICAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\libtensorflow-cpu-windows-x86_64-2.6.0\include;..\..\01_othello\common;..\..\01_othello\othello</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
